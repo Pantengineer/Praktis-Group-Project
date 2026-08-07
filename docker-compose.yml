@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:latest
@@ -10,17 +8,18 @@ services:
     restart: unless-stopped
 
   mysql:
+    env_file:
+      - ./server/.env
     image: mariadb:10.11
     ports:
       - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASS:-password}
-      MYSQL_DATABASE: ${MYSQL_DB_NAME:-praktis_db}
     volumes:
       - mysql_data:/var/lib/mysql
     restart: unless-stopped
 
   server:
+    env_file:
+      - ./server/.env
     build:
       context: ./server
       dockerfile: Dockerfile
@@ -29,23 +28,14 @@ services:
     volumes:
       - ./server:/usr/src/app
       - /usr/src/app/node_modules # Anonymous volume to prevent local node_modules from overwriting container's
-    environment:
-      - PORT=${PORT:-5001}
-      - NODE_ENV=${NODE_ENV:-development}
-      - MYSQL_HOST=mysql # Hardcoded to the Docker service name
-      - MYSQL_USER=${MYSQL_USER:-root}
-      - MYSQL_PASS=${MYSQL_PASS:-password}
-      - MYSQL_DB_NAME=${MYSQL_DB_NAME:-praktis_db}
-      - MYSQL_DIALECT=${MYSQL_DIALECT:-mysql}
-      - MONGO_URI=mongodb://mongodb:27017/${MYSQL_DB_NAME:-praktis_db}
-      - JWT_SECRET=${JWT_SECRET:-super_secret_key_for_development_minimum_32_chars_1234}
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:5173}
     depends_on:
       - mysql
       - mongodb
     restart: unless-stopped
 
   client:
+    env_file:
+      - ./client/.env.development
     build:
       context: ./client
       dockerfile: Dockerfile
@@ -55,7 +45,6 @@ services:
       - ./client:/usr/src/app
       - /usr/src/app/node_modules
     environment:
-      - VITE_API_URL=http://localhost:5001
       - CHOKIDAR_USEPOLLING=true
     depends_on:
       - server

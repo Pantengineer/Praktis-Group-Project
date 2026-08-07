@@ -2,7 +2,7 @@ const { Sequelize } = require('sequelize');
 
 // 1. IMPORT YOUR EXISTING CONNECTION
 // instead of treating it like a config file
-const sequelize = require('../../config/db.sql'); 
+const { sequelize } = require('../../config/db.sql');
 
 // 2. Initialize Models
 // Pass the existing 'sequelize' connection to the factory functions

@@ -54,22 +54,22 @@ async function seed() {
     console.log('⏳ Seeding Users (Admin, Mahasiswa)...');
 
     // 1 Admin
-    const adminPass = await bcrypt.hash('admin123', 10);
+    const adminPass = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
     const adminRole = await Role.findOne({ where: { deskripsi: 'admin' } });
     const adminUser = await User.create({
-      nama: 'Super Admin', email: 'admin@admin.com', password: adminPass, nim: '0000000000'
+      nama: process.env.ADMIN_NAME, email: process.env.ADMIN_EMAIL, password: adminPass, nim: process.env.ADMIN_NIM
     });
     await UserRole.create({ id_user: adminUser.id_user, id_role: adminRole.id_role });
 
     // 5 Mahasiswa
-    const mhsPass = await bcrypt.hash('mhs123', 10);
+    const mhsPass = await bcrypt.hash(process.env.MHS_PASSWORD, 10);
     const mhsRole = await Role.findOne({ where: { deskripsi: 'mahasiswa' } });
     const asdosRole = await Role.findOne({ where: { deskripsi: 'asdos' } });
 
     const mhsUsers = [];
     for (let i = 1; i <= 5; i++) {
       const u = await User.create({
-        nama: `Mahasiswa ${i}`, email: `mhs${i}@mhs.com`, password: mhsPass, nim: `111111111${i}`, prodi: 'Informatika', angkatan: 2024
+        nama: `Mahasiswa ${i}`, email: `mhs${i}@mhs.com`, password: mhsPass, nim: `123200100${i}`, prodi: 'Informatika', angkatan: 2023
       });
       await UserRole.create({ id_user: u.id_user, id_role: mhsRole.id_role }); // GLOBAL ROLE is always mahasiswa
       mhsUsers.push(u);
