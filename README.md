@@ -59,7 +59,7 @@ Praktis-Group-Project/
 ├── server/                      # Express REST API Backend
 │   ├── config/                  # DB connection configs (SQL & Mongo) & env loaders
 │   ├── controllers/             # Request handlers (auth, content, submission, admin)
-│   ├── middleware/              # authMiddleware, rbacMiddleware, uploadMiddleware, uploadRateLimiter, errorHandler
+│   ├── middleware/              # authMiddleware, rbacMiddleware, uploadMiddleware, rateLimiter, errorHandler
 │   ├── models/                  # SQL (Sequelize) & NoSQL (Mongoose) schemas
 │   ├── routes/                  # Express endpoints (auth, admin, content, submission, user, attendance)
 │   ├── uploads/                 # Storage folders (materi, submissions, tasks)
