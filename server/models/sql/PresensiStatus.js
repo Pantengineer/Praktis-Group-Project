@@ -1,5 +1,5 @@
 // server/models/sql/PresensiStatus.js
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const PresensiStatus = sequelize.define('PresensiStatus', {
     id_status: {
       type: DataTypes.TINYINT.UNSIGNED,

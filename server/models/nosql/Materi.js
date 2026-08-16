@@ -1,7 +1,7 @@
 // server/models/nosql/Materi.js
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const MateriSchema = new mongoose.Schema({
+const MateriSchema = new Schema({
   pertemuan_id: { type: Number, required: true, index: true }, // Link to SQL Session
   judul: { type: String, required: true },
   deskripsi: { type: String },
@@ -19,4 +19,4 @@ const MateriSchema = new mongoose.Schema({
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } 
 });
 
-module.exports = mongoose.model('Materi', MateriSchema);
+export default model('Materi', MateriSchema);

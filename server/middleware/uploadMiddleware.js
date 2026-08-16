@@ -1,7 +1,7 @@
 // server/middleware/uploadMiddleware.js
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 const createUploader = (subfolder) => {
   // 1. Dynamic Destination
@@ -15,7 +15,7 @@ const createUploader = (subfolder) => {
   const checkStorageLimit = () => {
     const maxStorageMB = parseInt(process.env.MAX_STORAGE_LIMIT_MB) || 5000;
     const maxStorageBytes = maxStorageMB * 1024 * 1024;
-    const rootUploads = path.join(__dirname, '../uploads');
+    const rootUploads = path.join(import.meta.dirname, '../uploads');
     
     let size = 0;
     const calculateSize = (dir) => {
@@ -41,7 +41,7 @@ const createUploader = (subfolder) => {
     if (!userId) return false;
     const maxUserQuotaMB = parseInt(process.env.MAX_USER_QUOTA_MB) || 100;
     const maxUserQuotaBytes = maxUserQuotaMB * 1024 * 1024;
-    const rootUploads = path.join(__dirname, '../uploads');
+    const rootUploads = path.join(import.meta.dirname, '../uploads');
     const userPrefix = `${userId}-`;
 
     let totalUserSize = 0;
@@ -123,4 +123,4 @@ const createUploader = (subfolder) => {
   });
 };
 
-module.exports = createUploader;
+export default createUploader;

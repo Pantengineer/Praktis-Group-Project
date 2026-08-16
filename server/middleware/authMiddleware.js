@@ -1,9 +1,9 @@
 // server/middleware/authMiddleware.js
-const jwt = require('jsonwebtoken');
-const env = require('../config/env');
+import jwt from 'jsonwebtoken';
+import env from '../config/env.js';
 
-const { extractClientIP } = require('./ipBanMiddleware');
-const UserSession = require('../models/nosql/UserSession');
+import { extractClientIP } from './ipBanMiddleware.js';
+import UserSession from '../models/nosql/UserSession.js';
 
 const verifyToken = (req, res, next) => {
   // 2.1: Check both HttpOnly cookie AND Authorization header.
@@ -44,4 +44,4 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-module.exports = verifyToken;
+export default verifyToken;

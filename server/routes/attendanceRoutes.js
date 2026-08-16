@@ -1,41 +1,18 @@
 // server/routes/attendanceRoutes.js
-// 2.8: Attendance (Presensi) routes — activates the dormant Presensi feature.
-const express = require('express');
+import express from 'express';
+
+// Controllers & Middleware
+import verifyToken from '../middleware/authMiddleware.js';
+import checkRole from '../middleware/rbacMiddleware.js';
+import { getSessionAttendance, submitAttendance, getMyAttendance, getStatuses } from '../controllers/attendanceController.js';
+
 const router = express.Router();
-const verifyToken = require('../middleware/authMiddleware');
-const checkRole = require('../middleware/rbacMiddleware');
-const attendanceController = require('../controllers/attendanceController');
 
-// All routes require authentication
 router.use(verifyToken);
+router.get('/session/:id_pertemuan', checkRole(['asdos', 'admin']), getSessionAttendance);
+router.post('/session/:id_pertemuan', checkRole(['asdos', 'admin']), submitAttendance);
 
-// =============================================
-// ASDOS ROUTES
-// =============================================
+router.get('/my/:id_praktikum', getMyAttendance);
+router.get('/statuses', getStatuses);
 
-// Get attendance sheet for a session (list of students + their current status)
-// GET /api/attendance/session/:id_pertemuan
-router.get('/session/:id_pertemuan', checkRole(['asdos', 'admin']), attendanceController.getSessionAttendance);
-
-// Submit / bulk-update attendance for a session
-// POST /api/attendance/session/:id_pertemuan
-// Body: { records: [{ id_user, id_status }, ...] }
-router.post('/session/:id_pertemuan', checkRole(['asdos', 'admin']), attendanceController.submitAttendance);
-
-// =============================================
-// MAHASISWA ROUTES
-// =============================================
-
-// Get own attendance across all sessions of a class
-// GET /api/attendance/my/:id_praktikum
-router.get('/my/:id_praktikum', attendanceController.getMyAttendance);
-
-// =============================================
-// SHARED UTILITY ROUTES
-// =============================================
-
-// Get all attendance status options (for dropdowns)
-// GET /api/attendance/statuses
-router.get('/statuses', attendanceController.getStatuses);
-
-module.exports = router;
+export default router;

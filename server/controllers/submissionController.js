@@ -1,12 +1,13 @@
 // server/controllers/submissionController.js
-const Pengumpulan = require('../models/nosql/Pengumpulan');
-const Tugas = require('../models/nosql/Tugas');
-const { PraktikumUserRole, Role, Pertemuan, User } = require('../models/sql');
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import mongoose from 'mongoose';
 
-// 1. STUDENT: Submit File (Smart Update with Old File Cleanup)
-exports.submitWork = async (req, res) => {
+import Pengumpulan from '../models/nosql/Pengumpulan.js';
+import Tugas from '../models/nosql/Tugas.js';
+import { PraktikumUserRole, Role, Pertemuan, User } from '../models/sql/index.js';
+
+const submitWork = async (req, res) => {
   try {
     const { tugas_id } = req.body;
     const studentId = req.user.id;
@@ -40,7 +41,7 @@ exports.submitWork = async (req, res) => {
     // D. Clean up previous physical file from disk if re-submitting
     const existingSubmission = await Pengumpulan.findOne({ tugas_id: tugas_id, student_id: studentId });
     if (existingSubmission && existingSubmission.file && existingSubmission.file.path) {
-      const oldPath = path.join(__dirname, '..', existingSubmission.file.path);
+      const oldPath = path.join(import.meta.dirname, '..', existingSubmission.file.path);
       if (fs.existsSync(oldPath)) {
         try { fs.unlinkSync(oldPath); } catch (e) { console.error('Failed to remove old file:', e); }
       }
@@ -77,8 +78,7 @@ exports.submitWork = async (req, res) => {
   }
 };
 
-// 2. ASDOS: Grade Submission
-exports.gradeWork = async (req, res) => {
+const gradeWork = async (req, res) => {
   try {
     const { submissionId } = req.params;
     const { nilai, feedback } = req.body;
@@ -107,7 +107,6 @@ exports.gradeWork = async (req, res) => {
     }
 
     // 4. Get session to find praktikum_id
-    const { Pertemuan, PraktikumUserRole, Role } = require('../models/sql');
     const session = await Pertemuan.findByPk(task.pertemuan_id);
     if (!session) {
       return res.status(404).json({ message: 'Session not found' });
@@ -152,8 +151,7 @@ exports.gradeWork = async (req, res) => {
   }
 };
 
-// 3. Download File
-exports.downloadFile = async (req, res, next) => {
+const downloadFile = async (req, res, next) => {
   try {
     const { submissionId } = req.params;
 
@@ -174,11 +172,11 @@ exports.downloadFile = async (req, res, next) => {
     const normalizedDbPath = file.path.replace(/\\/g, '/');
 
     // B. Resolve absolute path
-    const filePath = path.resolve(path.join(__dirname, '..', normalizedDbPath));
+    const filePath = path.resolve(path.join(import.meta.dirname, '..', normalizedDbPath));
 
     // Security fix (SV-9): Path traversal guard.
     // Ensure the resolved path is within the expected uploads directory.
-    const uploadsRoot = path.resolve(path.join(__dirname, '..', 'uploads'));
+    const uploadsRoot = path.resolve(path.join(import.meta.dirname, '..', 'uploads'));
     if (!filePath.startsWith(uploadsRoot + path.sep) && filePath !== uploadsRoot) {
       return res.status(403).json({ message: 'Access denied: invalid file path' });
     }
@@ -219,7 +217,7 @@ exports.downloadFile = async (req, res, next) => {
   }
 };
 
-exports.getSubmissionsByTask = async (req, res, next) => {
+const getSubmissionsByTask = async (req, res, next) => {
   try {
     const { taskId } = req.params;
 
@@ -255,8 +253,7 @@ exports.getSubmissionsByTask = async (req, res, next) => {
   }
 };
 
-// NEW: Get Logged-in Student's Submission for a Task
-exports.getMySubmission = async (req, res, next) => {
+const getMySubmission = async (req, res, next) => {
   try {
     const { taskId } = req.params;
     const userId = req.user.id; // From authMiddleware
@@ -278,7 +275,7 @@ exports.getMySubmission = async (req, res, next) => {
   }
 };
 
-exports.getMySubmissionsForTasks = async (req, res, next) => {
+const getMySubmissionsForTasks = async (req, res, next) => {
   try {
     const { taskIds } = req.body; // Expects array of IDs: ["id1", "id2"]
     const studentId = req.user.id;
@@ -309,8 +306,7 @@ exports.getMySubmissionsForTasks = async (req, res, next) => {
   }
 };
 
-// NEW: Add a comment to a submission
-exports.addComment = async (req, res, next) => {
+const addComment = async (req, res, next) => {
   try {
     const { submissionId } = req.params;
     const { text } = req.body;
@@ -319,7 +315,6 @@ exports.addComment = async (req, res, next) => {
     const userId = req.user.id;
 
     // Fetch the user from the SQL database to get their real name
-    const { User } = require('../models/sql');
     const userRecord = await User.findByPk(userId);
     const userName = userRecord ? userRecord.nama : 'User';
 
@@ -342,14 +337,12 @@ exports.addComment = async (req, res, next) => {
   }
 };
 
-// 7. STUDENT / ASDOS / ADMIN: Delete / Unsubmit Work
-exports.deleteSubmission = async (req, res, next) => {
+const deleteSubmission = async (req, res, next) => {
   try {
     const { submissionId } = req.params;
     const userId = req.user.id;
     const userRole = req.user.role || (req.user.roles ? req.user.roles[0] : null);
 
-    const mongoose = require('mongoose');
     let submission = null;
 
     if (mongoose.Types.ObjectId.isValid(submissionId)) {
@@ -371,7 +364,7 @@ exports.deleteSubmission = async (req, res, next) => {
 
     // Delete physical file from server disk
     if (submission.file && submission.file.path) {
-      const filePath = path.join(__dirname, '..', submission.file.path);
+      const filePath = path.join(import.meta.dirname, '..', submission.file.path);
       if (fs.existsSync(filePath)) {
         try { fs.unlinkSync(filePath); } catch (e) { console.error('Failed to unlink submission file:', e); }
       }
@@ -385,3 +378,14 @@ exports.deleteSubmission = async (req, res, next) => {
     next(error);
   }
 };
+
+export default {
+  submitWork,
+  gradeWork,
+  downloadFile,
+  getSubmissionsByTask,
+  getMySubmission,
+  getMySubmissionsForTasks,
+  addComment,
+  deleteSubmission,
+}

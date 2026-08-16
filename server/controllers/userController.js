@@ -1,12 +1,14 @@
 // server/controllers/userController.js
-const { Op } = require('sequelize'); // Fix BG-1: Op was used but never imported
-const { User, Praktikum, PraktikumUserRole, Role, Pertemuan } = require('../models/sql');
-const Tugas = require('../models/nosql/Tugas');
-const Pengumpulan = require('../models/nosql/Pengumpulan');
-const bcrypt = require('bcryptjs');
-const response = require('../utils/responseHelper');
+import { Op } from 'sequelize';
 
-exports.getProfile = async (req, res) => {
+import { User, Praktikum, PraktikumUserRole, Role, Pertemuan } from '../models/sql/index.js';
+import Tugas from '../models/nosql/Tugas.js';
+import Pengumpulan from '../models/nosql/Pengumpulan.js';
+
+import bcrypt from 'bcryptjs';
+import response from '../utils/responseHelper.js';
+
+const getProfile = async (req, res) => {
   try {
     const userId = req.user.id; // From authMiddleware
 
@@ -26,7 +28,7 @@ exports.getProfile = async (req, res) => {
     });
 
     if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     // 2. Format Classes List
@@ -60,7 +62,7 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-exports.updateProfile = async (req, res) => {
+const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
     // Extract all possible fields from the request body
@@ -69,31 +71,31 @@ exports.updateProfile = async (req, res) => {
     // 1. Fetch current user
     const user = await User.findByPk(userId);
     if (!user) {
-        return response.error(res, 404, 'User not found');
+      return response.error(res, 404, 'User not found');
     }
 
     // 2. CHECK UNIQUENESS (Prevent duplicate Email or NIM)
     // We only check if the user is actually CHANGING the email or nim
     if ((email && email !== user.email) || (nim && nim !== user.nim)) {
-        const conflict = await User.findOne({
-            where: {
-                [Op.and]: [
-                    { id_user: { [Op.ne]: userId } }, // Exclude current user (ID != myID)
-                    {
-                        [Op.or]: [
-                            // Check if new email is taken (ignore if undefined)
-                            email ? { email: email } : null,
-                            // Check if new nim is taken (ignore if undefined)
-                            nim ? { nim: nim } : null
-                        ].filter(Boolean) // Remove nulls
-                    }
-                ]
+      const conflict = await User.findOne({
+        where: {
+          [Op.and]: [
+            { id_user: { [Op.ne]: userId } }, // Exclude current user (ID != myID)
+            {
+              [Op.or]: [
+                // Check if new email is taken (ignore if undefined)
+                email ? { email: email } : null,
+                // Check if new nim is taken (ignore if undefined)
+                nim ? { nim: nim } : null
+              ].filter(Boolean) // Remove nulls
             }
-        });
-
-        if (conflict) {
-            return response.error(res, 400, 'Email atau NIM sudah digunakan oleh user lain.');
+          ]
         }
+      });
+
+      if (conflict) {
+        return response.error(res, 400, 'Email atau NIM sudah digunakan oleh user lain.');
+      }
     }
 
     // 3. Update Standard Fields
@@ -127,102 +129,102 @@ exports.updateProfile = async (req, res) => {
 // =========================================================
 // ASDOS DASHBOARD
 // =========================================================
-exports.getAsdosDashboard = async (req, res) => {
+const getAsdosDashboard = async (req, res) => {
   try {
     const userId = req.user.id;
 
     const assignments = await PraktikumUserRole.findAll({
       where: { id_user: userId },
       include: [
-        { 
-            model: Praktikum,
-            // CORRECTION: Using 'mata_kuliah' and 'kode_kelas' based on your Praktikum.js
-            attributes: ['id_praktikum', 'mata_kuliah', 'kode_kelas', 'tahun_pelajaran', 'jadwal', 'ruangan'] 
+        {
+          model: Praktikum,
+          // CORRECTION: Using 'mata_kuliah' and 'kode_kelas' based on your Praktikum.js
+          attributes: ['id_praktikum', 'mata_kuliah', 'kode_kelas', 'tahun_pelajaran', 'jadwal', 'ruangan']
         },
-        { 
-            model: Role, 
-            // CORRECTION: Using 'deskripsi' based on your Role.js
-            where: { deskripsi: 'asdos' } 
+        {
+          model: Role,
+          // CORRECTION: Using 'deskripsi' based on your Role.js
+          where: { deskripsi: 'asdos' }
         }
       ]
     });
 
     // Format data with additional stats per class
     const teachingClassesRaw = await Promise.all(assignments.map(async (a) => {
-        if (!a.Praktikum) return null;
-        
-        const id_praktikum = a.Praktikum.id_praktikum;
+      if (!a.Praktikum) return null;
 
-        // 1. Student Count
-        const studentCount = await PraktikumUserRole.count({
-            where: { id_praktikum },
-            include: [{ model: Role, where: { deskripsi: 'mahasiswa' } }]
+      const id_praktikum = a.Praktikum.id_praktikum;
+
+      // 1. Student Count
+      const studentCount = await PraktikumUserRole.count({
+        where: { id_praktikum },
+        include: [{ model: Role, where: { deskripsi: 'mahasiswa' } }]
+      });
+
+      // 2. Next Session (Find closest future date, fallback to latest past session)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      let nextSession = await Pertemuan.findOne({
+        where: {
+          id_praktikum,
+          tanggal: { [Op.gte]: today }
+        },
+        order: [['tanggal', 'ASC']]
+      });
+
+      let isPastSession = false;
+      if (!nextSession) {
+        nextSession = await Pertemuan.findOne({
+          where: { id_praktikum },
+          order: [['tanggal', 'DESC']]
         });
+        if (nextSession) isPastSession = true;
+      }
 
-        // 2. Next Session (Find closest future date, fallback to latest past session)
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        
-        let nextSession = await Pertemuan.findOne({
-            where: { 
-                id_praktikum,
-                tanggal: { [Op.gte]: today }
-            },
-            order: [['tanggal', 'ASC']]
-        });
+      // 3. Ungraded Tasks
+      const sessions = await Pertemuan.findAll({
+        where: { id_praktikum },
+        attributes: ['id_pertemuan']
+      });
+      const sessionIds = sessions.map(s => s.id_pertemuan);
 
-        let isPastSession = false;
-        if (!nextSession) {
-            nextSession = await Pertemuan.findOne({
-                where: { id_praktikum },
-                order: [['tanggal', 'DESC']]
-            });
-            if (nextSession) isPastSession = true;
-        }
+      const tasks = await Tugas.find({ pertemuan_id: { $in: sessionIds } }).select('_id');
+      const taskIds = tasks.map(t => t._id);
 
-        // 3. Ungraded Tasks
-        const sessions = await Pertemuan.findAll({
-            where: { id_praktikum },
-            attributes: ['id_pertemuan']
-        });
-        const sessionIds = sessions.map(s => s.id_pertemuan);
+      const ungradedCount = await Pengumpulan.countDocuments({
+        tugas_id: { $in: taskIds },
+        $or: [{ status: 'diserahkan' }, { nilai: null }]
+      });
 
-        const tasks = await Tugas.find({ pertemuan_id: { $in: sessionIds } }).select('_id');
-        const taskIds = tasks.map(t => t._id);
-
-        const ungradedCount = await Pengumpulan.countDocuments({
-            tugas_id: { $in: taskIds },
-            $or: [{ status: 'diserahkan' }, { nilai: null }]
-        });
-
-        return {
-            id_praktikum: a.Praktikum.id_praktikum,
-            nama_praktikum: a.Praktikum.mata_kuliah, 
-            kode: a.Praktikum.kode_kelas,
-            jadwal: a.Praktikum.jadwal,
-            ruangan: a.Praktikum.ruangan,
-            tahun_pelajaran: a.Praktikum.tahun_pelajaran,
-            studentCount,
-            nextSessionDate: nextSession ? nextSession.tanggal : null,
-            nextSessionSesiKe: nextSession ? nextSession.sesi_ke : null,
-            isPastSession,
-            ungradedCount
-        };
+      return {
+        id_praktikum: a.Praktikum.id_praktikum,
+        nama_praktikum: a.Praktikum.mata_kuliah,
+        kode: a.Praktikum.kode_kelas,
+        jadwal: a.Praktikum.jadwal,
+        ruangan: a.Praktikum.ruangan,
+        tahun_pelajaran: a.Praktikum.tahun_pelajaran,
+        studentCount,
+        nextSessionDate: nextSession ? nextSession.tanggal : null,
+        nextSessionSesiKe: nextSession ? nextSession.sesi_ke : null,
+        isPastSession,
+        ungradedCount
+      };
     }));
-    
+
     const teachingClasses = teachingClassesRaw.filter(item => item !== null);
-    
+
     // Aggregate global stats for top cards
     const totalStudents = teachingClasses.reduce((sum, cls) => sum + cls.studentCount, 0);
     const pendingGrading = teachingClasses.reduce((sum, cls) => sum + cls.ungradedCount, 0);
 
     res.json({
-        stats: { 
-            totalClasses: teachingClasses.length,
-            totalStudents,
-            pendingGrading
-        },
-        classes: teachingClasses
+      stats: {
+        totalClasses: teachingClasses.length,
+        totalStudents,
+        pendingGrading
+      },
+      classes: teachingClasses
     });
 
   } catch (error) {
@@ -234,7 +236,7 @@ exports.getAsdosDashboard = async (req, res) => {
 // =========================================================
 // MAHASISWA DASHBOARD
 // =========================================================
-exports.getMahasiswaDashboard = async (req, res) => {
+const getMahasiswaDashboard = async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -242,12 +244,12 @@ exports.getMahasiswaDashboard = async (req, res) => {
     const enrollments = await PraktikumUserRole.findAll({
       where: { id_user: userId },
       include: [
-        { 
-            model: Praktikum,
-            attributes: ['id_praktikum', 'mata_kuliah', 'kode_kelas', 'jadwal', 'ruangan', 'tahun_pelajaran'] 
+        {
+          model: Praktikum,
+          attributes: ['id_praktikum', 'mata_kuliah', 'kode_kelas', 'jadwal', 'ruangan', 'tahun_pelajaran']
         },
-        { 
-            model: Role
+        {
+          model: Role
         }
       ]
     });
@@ -256,103 +258,103 @@ exports.getMahasiswaDashboard = async (req, res) => {
     const mhsEnrollments = enrollments.filter(e => e.Praktikum && (!e.Role || e.Role.deskripsi?.toLowerCase() !== 'asdos'));
 
     const today = new Date();
-    today.setHours(0,0,0,0);
+    today.setHours(0, 0, 0, 0);
 
     // Format for Frontend with next session date and pending tasks count
     const enrolledClassesRaw = await Promise.all(mhsEnrollments.map(async (e) => {
-        if (!e.Praktikum) return null;
-        const id_praktikum = e.Praktikum.id_praktikum;
+      if (!e.Praktikum) return null;
+      const id_praktikum = e.Praktikum.id_praktikum;
 
-        let nextSessionDate = null;
-        let nextSessionSesiKe = null;
-        let isPastSession = false;
-        let pendingTaskCount = 0;
-        let closestDeadlineDays = null;
+      let nextSessionDate = null;
+      let nextSessionSesiKe = null;
+      let isPastSession = false;
+      let pendingTaskCount = 0;
+      let closestDeadlineDays = null;
 
-        try {
-            // 1. Next Session (Find closest future session date, fallback to latest completed session)
-            let nextSession = await Pertemuan.findOne({
-                where: { 
-                    id_praktikum,
-                    tanggal: { [Op.gte]: today }
-                },
-                order: [['tanggal', 'ASC']]
-            });
+      try {
+        // 1. Next Session (Find closest future session date, fallback to latest completed session)
+        let nextSession = await Pertemuan.findOne({
+          where: {
+            id_praktikum,
+            tanggal: { [Op.gte]: today }
+          },
+          order: [['tanggal', 'ASC']]
+        });
 
-            if (!nextSession) {
-                nextSession = await Pertemuan.findOne({
-                    where: { id_praktikum },
-                    order: [['tanggal', 'DESC']]
-                });
-                if (nextSession) isPastSession = true;
-            }
-
-            if (nextSession) {
-                nextSessionDate = nextSession.tanggal;
-                nextSessionSesiKe = nextSession.sesi_ke;
-            }
-
-            // 2. Pending Tasks calculation
-            const sessions = await Pertemuan.findAll({
-                where: { id_praktikum },
-                attributes: ['id_pertemuan']
-            });
-            const sessionIds = sessions.map(s => s.id_pertemuan);
-
-            if (sessionIds.length > 0) {
-                const tasks = await Tugas.find({ 
-                    pertemuan_id: { $in: sessionIds },
-                    tenggat_waktu: { $gte: new Date() }
-                }).sort({ tenggat_waktu: 1 });
-
-                const taskIds = tasks.map(t => t._id);
-
-                // Note: Schema field is student_id (Number)
-                const mySubmissions = await Pengumpulan.find({
-                    student_id: Number(userId),
-                    tugas_id: { $in: taskIds }
-                }).select('tugas_id');
-
-                const submittedTaskIds = new Set(mySubmissions.map(s => s.tugas_id.toString()));
-                const uncompletedTasks = tasks.filter(t => !submittedTaskIds.has(t._id.toString()));
-
-                pendingTaskCount = uncompletedTasks.length;
-
-                if (uncompletedTasks.length > 0) {
-                    const closestDue = new Date(uncompletedTasks[0].tenggat_waktu);
-                    const now = new Date();
-                    const diffDays = Math.ceil((closestDue - now) / (1000 * 60 * 60 * 24));
-                    closestDeadlineDays = diffDays >= 0 ? diffDays : 0;
-                }
-            }
-        } catch (err) {
-            console.error(`Error processing metrics for praktikum ${id_praktikum}:`, err);
+        if (!nextSession) {
+          nextSession = await Pertemuan.findOne({
+            where: { id_praktikum },
+            order: [['tanggal', 'DESC']]
+          });
+          if (nextSession) isPastSession = true;
         }
 
-        return {
-            id_praktikum: e.Praktikum.id_praktikum,
-            nama_praktikum: e.Praktikum.mata_kuliah,
-            kode: e.Praktikum.kode_kelas,
-            jadwal: e.Praktikum.jadwal,
-            ruangan: e.Praktikum.ruangan,
-            tahun_pelajaran: e.Praktikum.tahun_pelajaran,
-            nextSessionDate,
-            nextSessionSesiKe,
-            isPastSession,
-            pendingTaskCount,
-            closestDeadlineDays
-        };
+        if (nextSession) {
+          nextSessionDate = nextSession.tanggal;
+          nextSessionSesiKe = nextSession.sesi_ke;
+        }
+
+        // 2. Pending Tasks calculation
+        const sessions = await Pertemuan.findAll({
+          where: { id_praktikum },
+          attributes: ['id_pertemuan']
+        });
+        const sessionIds = sessions.map(s => s.id_pertemuan);
+
+        if (sessionIds.length > 0) {
+          const tasks = await Tugas.find({
+            pertemuan_id: { $in: sessionIds },
+            tenggat_waktu: { $gte: new Date() }
+          }).sort({ tenggat_waktu: 1 });
+
+          const taskIds = tasks.map(t => t._id);
+
+          // Note: Schema field is student_id (Number)
+          const mySubmissions = await Pengumpulan.find({
+            student_id: Number(userId),
+            tugas_id: { $in: taskIds }
+          }).select('tugas_id');
+
+          const submittedTaskIds = new Set(mySubmissions.map(s => s.tugas_id.toString()));
+          const uncompletedTasks = tasks.filter(t => !submittedTaskIds.has(t._id.toString()));
+
+          pendingTaskCount = uncompletedTasks.length;
+
+          if (uncompletedTasks.length > 0) {
+            const closestDue = new Date(uncompletedTasks[0].tenggat_waktu);
+            const now = new Date();
+            const diffDays = Math.ceil((closestDue - now) / (1000 * 60 * 60 * 24));
+            closestDeadlineDays = diffDays >= 0 ? diffDays : 0;
+          }
+        }
+      } catch (err) {
+        console.error(`Error processing metrics for praktikum ${id_praktikum}:`, err);
+      }
+
+      return {
+        id_praktikum: e.Praktikum.id_praktikum,
+        nama_praktikum: e.Praktikum.mata_kuliah,
+        kode: e.Praktikum.kode_kelas,
+        jadwal: e.Praktikum.jadwal,
+        ruangan: e.Praktikum.ruangan,
+        tahun_pelajaran: e.Praktikum.tahun_pelajaran,
+        nextSessionDate,
+        nextSessionSesiKe,
+        isPastSession,
+        pendingTaskCount,
+        closestDeadlineDays
+      };
     }));
 
     const enrolledClasses = enrolledClassesRaw.filter(item => item !== null);
     const totalPendingTasks = enrolledClasses.reduce((sum, cls) => sum + cls.pendingTaskCount, 0);
 
     res.json({
-        stats: { 
-          activeClasses: enrolledClasses.length,
-          assignmentsPending: totalPendingTasks
-        },
-        enrolledClasses: enrolledClasses
+      stats: {
+        activeClasses: enrolledClasses.length,
+        assignmentsPending: totalPendingTasks
+      },
+      enrolledClasses: enrolledClasses
     });
 
   } catch (error) {
@@ -364,10 +366,10 @@ exports.getMahasiswaDashboard = async (req, res) => {
 // =========================================================
 // ADMIN: Get Specific User Details + Enrollments
 // =========================================================
-exports.getUserById = async (req, res) => {
+const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const user = await User.findByPk(id, {
       attributes: { exclude: ['password'] },
       include: [
@@ -409,17 +411,17 @@ exports.getUserById = async (req, res) => {
   }
 };
 
-exports.updateUserByAdmin = async (req, res) => {
+const updateUserByAdmin = async (req, res) => {
   try {
     const { id } = req.params;
     const { nama, email, nim, prodi, angkatan } = req.body;
-    
+
     // Simple update without complex checks for now
     await User.update(
       { nama, email, nim, prodi, angkatan },
       { where: { id_user: id } }
     );
-    
+
     res.json({ message: 'User updated by Admin' });
   } catch (err) {
     res.status(500).json({ message: 'Update failed' });
@@ -429,7 +431,7 @@ exports.updateUserByAdmin = async (req, res) => {
 // =========================================================
 // ADMIN: Assign User to Class
 // =========================================================
-exports.assignUserToClass = async (req, res) => {
+const assignUserToClass = async (req, res) => {
   try {
     const { id_user, id_praktikum, role_name } = req.body;
 
@@ -469,7 +471,7 @@ exports.assignUserToClass = async (req, res) => {
 // =========================================================
 // ADMIN: Remove User from Class
 // =========================================================
-exports.removeUserFromClass = async (req, res) => {
+const removeUserFromClass = async (req, res) => {
   try {
     const { id_user, id_praktikum } = req.body;
 
@@ -484,3 +486,13 @@ exports.removeUserFromClass = async (req, res) => {
   }
 };
 
+export default {
+  getProfile,
+  updateProfile,
+  getAsdosDashboard,
+  getMahasiswaDashboard,
+  getUserById,
+  updateUserByAdmin,
+  assignUserToClass,
+  removeUserFromClass,
+}

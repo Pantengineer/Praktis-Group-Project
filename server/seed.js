@@ -1,18 +1,20 @@
-require('dotenv').config();
-const bcrypt = require('bcryptjs');
-const fs = require('fs');
-const path = require('path');
-const { sequelize, User, Role, UserRole, PresensiStatus, Praktikum, PraktikumUserRole, Pertemuan } = require('./models/sql');
-const connectMongo = require('./config/db.mongo');
-const Materi = require('./models/nosql/Materi');
-const Tugas = require('./models/nosql/Tugas');
-const Pengumpulan = require('./models/nosql/Pengumpulan');
+import 'dotenv/config';
+
+import bcrypt from 'bcryptjs';
+import fs from 'fs';
+import path from 'path';
+
+import { sequelize, User, Role, UserRole, PresensiStatus, Praktikum, PraktikumUserRole, Pertemuan } from './models/sql/index.js';
+import connectMongo from './config/db.mongo.js';
+import Materi from './models/nosql/Materi.js';
+import Tugas from './models/nosql/Tugas.js';
+import Pengumpulan from './models/nosql/Pengumpulan.js';
 
 // Wiping uploads directory safely
 const clearUploads = () => {
   const uploadDirs = ['materials', 'tasks', 'submissions'];
   uploadDirs.forEach(dir => {
-    const dirPath = path.join(__dirname, 'uploads', dir);
+    const dirPath = path.join(import.meta.dirname, 'uploads', dir);
     if (fs.existsSync(dirPath)) {
       fs.rmSync(dirPath, { recursive: true, force: true });
     }

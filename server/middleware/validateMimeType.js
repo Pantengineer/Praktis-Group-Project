@@ -7,9 +7,9 @@
 // Usage: Place AFTER multer upload middleware in a route.
 //   router.post('/upload', upload.single('file'), validateMimeType, controller)
 //
-const fs = require('fs');
-const path = require('path');
-const fileType = require('file-type'); // file-type@16 (last CommonJS-compatible version)
+import fs from 'fs';
+import path from 'path';
+import fileType from 'file-type';
 
 // Map allowed extensions to their expected MIME type prefixes or exact types.
 // This is the ground truth; we reject anything not in this map.
@@ -122,4 +122,4 @@ const validateMimeType = async (req, res, next) => {
   }
 };
 
-module.exports = validateMimeType;
+export default validateMimeType;

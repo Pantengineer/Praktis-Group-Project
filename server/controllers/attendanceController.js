@@ -1,12 +1,12 @@
 // server/controllers/attendanceController.js
 // 2.8: Full attendance (Presensi) CRUD — activates the dormant Presensi model.
-const { Presensi, PresensiStatus, Pertemuan, Praktikum, PraktikumUserRole, Role, User } = require('../models/sql');
+import { Presensi, PresensiStatus, Pertemuan, Praktikum, PraktikumUserRole, Role, User } from '../models/sql/index.js';
 
 // ============================================================
 // GET /api/attendance/session/:id_pertemuan
 // Asdos: Get attendance sheet for a session (all enrolled students + their status)
 // ============================================================
-exports.getSessionAttendance = async (req, res, next) => {
+async function getSessionAttendance(req, res, next) {
   try {
     const { id_pertemuan } = req.params;
 
@@ -41,11 +41,11 @@ exports.getSessionAttendance = async (req, res, next) => {
       nim: e.User.nim,
       presensi: recordMap[e.User.id_user]
         ? {
-            id_presensi: recordMap[e.User.id_user].id_presensi,
-            id_status: recordMap[e.User.id_user].id_status,
-            status_label: recordMap[e.User.id_user].PresensiStatus?.status || '-',
-            last_updated: recordMap[e.User.id_user].last_updated
-          }
+          id_presensi: recordMap[e.User.id_user].id_presensi,
+          id_status: recordMap[e.User.id_user].id_status,
+          status_label: recordMap[e.User.id_user].PresensiStatus?.status || '-',
+          last_updated: recordMap[e.User.id_user].last_updated
+        }
         : null
     }));
 
@@ -65,14 +65,14 @@ exports.getSessionAttendance = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
+}
 
 // ============================================================
 // POST /api/attendance/session/:id_pertemuan
 // Asdos: Submit/update attendance for one or more students in bulk
 // Body: { records: [{ id_user, id_status }, ...] }
 // ============================================================
-exports.submitAttendance = async (req, res, next) => {
+async function submitAttendance(req, res, next) {
   try {
     const { id_pertemuan } = req.params;
     const { records } = req.body;
@@ -106,13 +106,13 @@ exports.submitAttendance = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
+}
 
 // ============================================================
 // GET /api/attendance/my/:id_praktikum
 // Mahasiswa: View their own attendance for all sessions of a class
 // ============================================================
-exports.getMyAttendance = async (req, res, next) => {
+async function getMyAttendance(req, res, next) {
   try {
     const { id_praktikum } = req.params;
     const id_user = req.user.id;
@@ -156,17 +156,24 @@ exports.getMyAttendance = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
+}
 
 // ============================================================
 // GET /api/attendance/statuses
 // Get all available attendance statuses (for dropdowns)
 // ============================================================
-exports.getStatuses = async (req, res, next) => {
+async function getStatuses(req, res, next) {
   try {
     const statuses = await PresensiStatus.findAll();
     res.json(statuses);
   } catch (error) {
     next(error);
   }
-};
+}
+
+export {
+  getSessionAttendance,
+  submitAttendance,
+  getMyAttendance,
+  getStatuses,
+}

@@ -1,13 +1,13 @@
 // server/routes/userRoutes.js
-const express = require('express');
-const router = express.Router();
-const userController = require('../controllers/userController');
-const checkRole = require('../middleware/rbacMiddleware');
-const { PraktikumUserRole, Role } = require('../models/sql');
+import express from 'express';
+import { PraktikumUserRole, Role } from '../models/sql/index.js';
 
-// === FIX IS HERE ===
-// Remove the { } brackets. Import it directly.
-const verifyToken = require('../middleware/authMiddleware');
+// Controllers & Middlewares
+import userController from '../controllers/userController.js';
+import checkRole from '../middleware/rbacMiddleware.js';
+import verifyToken from '../middleware/authMiddleware.js';
+
+const router = express.Router();
 
 // Apply Auth Middleware
 router.use(verifyToken);
@@ -77,4 +77,4 @@ router.post('/admin/unenroll',
   userController.removeUserFromClass
 );
 
-module.exports = router;
+export default router;

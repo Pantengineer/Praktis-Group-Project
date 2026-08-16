@@ -1,7 +1,7 @@
 // server/models/nosql/Tugas.js
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const TugasSchema = new mongoose.Schema({
+const TugasSchema = new Schema({
   // THE LINK TO SQL:
   pertemuan_id: { 
     type: Number, // SQL IDs are numbers (BigInt), so Number works here
@@ -26,4 +26,4 @@ const TugasSchema = new mongoose.Schema({
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } 
 });
 
-module.exports = mongoose.model('Tugas', TugasSchema);
+export default model('Tugas', TugasSchema);

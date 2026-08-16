@@ -1,5 +1,5 @@
 // server/middleware/ipBanMiddleware.js
-const BannedIP = require('../models/nosql/BannedIP');
+import BannedIP from '../models/nosql/BannedIP.js';
 
 const extractClientIP = (req) => {
   const forwarded = req.headers['x-forwarded-for'];
@@ -13,7 +13,7 @@ const extractClientIP = (req) => {
 const ipBanMiddleware = async (req, res, next) => {
   try {
     const clientIP = extractClientIP(req);
-    
+
     // Check if IP is in ban database
     const banRecord = await BannedIP.findOne({ ip_address: clientIP });
 
@@ -42,4 +42,4 @@ const ipBanMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = { ipBanMiddleware, extractClientIP };
+export { ipBanMiddleware, extractClientIP };

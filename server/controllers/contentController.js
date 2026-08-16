@@ -1,18 +1,15 @@
 // server/controllers/contentController.js
-const path = require('path');
-const fs = require('fs');
-const Tugas = require('../models/nosql/Tugas');
-const Materi = require('../models/nosql/Materi');
-const Pengumpulan = require('../models/nosql/Pengumpulan'); // needed for cascade delete
-const { Op } = require('sequelize');
-const { Pertemuan, Praktikum, PraktikumUserRole, Role, Presensi } = require('../models/sql');
+import path from 'path';
+import fs from 'fs';
+import { Op } from 'sequelize';
 
-// ==========================================
-// A. SESSION MANAGEMENT (SQL: Pertemuan)
-// ==========================================
+import Tugas from '../models/nosql/Tugas.js';
+import Materi from '../models/nosql/Materi.js';
+import Pengumpulan from '../models/nosql/Pengumpulan.js';
+import { Pertemuan, Praktikum, PraktikumUserRole, Role, Presensi } from '../models/sql/index.js';
 
 // 1. Create a Session (Schedule)
-exports.createSession = async (req, res, next) => {
+const createSession = async (req, res, next) => {
   try {
     const { id_praktikum, sesi_ke, tanggal, waktu_mulai, waktu_selesai, ruangan } = req.body;
     const userId = req.user.id;
@@ -51,7 +48,7 @@ exports.createSession = async (req, res, next) => {
 };
 
 // 2. Get All Sessions (Timeline)
-exports.getSessionsByClass = async (req, res, next) => {
+const getSessionsByClass = async (req, res, next) => {
   try {
     const { id_praktikum } = req.params;
     const sessions = await Pertemuan.findAll({
@@ -65,7 +62,7 @@ exports.getSessionsByClass = async (req, res, next) => {
 };
 
 // 2b. Get Single Class Info (for header banners)
-exports.getClassInfo = async (req, res, next) => {
+const getClassInfo = async (req, res, next) => {
   try {
     const { id_praktikum } = req.params;
     const cls = await Praktikum.findByPk(id_praktikum);
@@ -77,7 +74,7 @@ exports.getClassInfo = async (req, res, next) => {
 };
 
 // 3. Delete Session — with cascade to MongoDB documents (2.6: orphan prevention)
-exports.deleteSession = async (req, res, next) => {
+const deleteSession = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -115,7 +112,7 @@ exports.deleteSession = async (req, res, next) => {
 // ==========================================
 
 // 4. Create Task (Tugas)
-exports.createTask = async (req, res, next) => {
+const createTask = async (req, res, next) => {
   try {
     const { pertemuan_id, judul, deskripsi, tenggat_waktu } = req.body;
 
@@ -141,7 +138,7 @@ exports.createTask = async (req, res, next) => {
 };
 
 // 5. Create Material (Materi)
-exports.createMaterial = async (req, res, next) => {
+const createMaterial = async (req, res, next) => {
   try {
     const { pertemuan_id, judul, deskripsi } = req.body;
     const files = req.files || [];
@@ -159,8 +156,8 @@ exports.createMaterial = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-// 6. Getters
-exports.getTasksBySession = async (req, res, next) => {
+// 6. Getters 
+const getTasksBySession = async (req, res, next) => {
   try {
     const { pertemuan_id } = req.params;
     const tasks = await Tugas.find({ pertemuan_id });
@@ -168,7 +165,7 @@ exports.getTasksBySession = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-exports.getMaterialsBySession = async (req, res, next) => {
+const getMaterialsBySession = async (req, res, next) => {
   try {
     const { pertemuan_id } = req.params;
     const materials = await Materi.find({ pertemuan_id });
@@ -177,7 +174,7 @@ exports.getMaterialsBySession = async (req, res, next) => {
 };
 
 // 7. Download Material File
-exports.downloadMaterialFile = async (req, res, next) => {
+const downloadMaterialFile = async (req, res, next) => {
   try {
     const { materiId, fileIndex } = req.params;
     const material = await Materi.findById(materiId);
@@ -195,11 +192,11 @@ exports.downloadMaterialFile = async (req, res, next) => {
     const normalizedDbPath = file.path.replace(/\\/g, '/');
 
     // 2. Resolve absolute path
-    const filePath = path.resolve(path.join(__dirname, '..', normalizedDbPath));
+    const filePath = path.resolve(path.join(import.meta.dirname, '..', normalizedDbPath));
 
     // Security fix (SV-9): Path traversal guard.
     // Ensure the resolved path is within the expected uploads directory.
-    const uploadsRoot = path.resolve(path.join(__dirname, '..', 'uploads'));
+    const uploadsRoot = path.resolve(path.join(import.meta.dirname, '..', 'uploads'));
     if (!filePath.startsWith(uploadsRoot + path.sep) && filePath !== uploadsRoot) {
       return res.status(403).json({ message: 'Access denied: invalid file path' });
     }
@@ -248,7 +245,7 @@ exports.downloadMaterialFile = async (req, res, next) => {
 // ==========================================
 // NEW: Update Session (Reschedule)
 // ==========================================
-exports.updateSession = async (req, res, next) => {
+const updateSession = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { tanggal, waktu_mulai, waktu_selesai, ruangan } = req.body;
@@ -287,7 +284,7 @@ exports.updateSession = async (req, res, next) => {
 };
 
 // NEW: Get Single Task by ID
-exports.getTaskById = async (req, res, next) => {
+const getTaskById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const task = await Tugas.findById(id);
@@ -300,7 +297,7 @@ exports.getTaskById = async (req, res, next) => {
   }
 };
 
-exports.getSessionById = async (req, res, next) => {
+const getSessionById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const session = await Pertemuan.findByPk(id);
@@ -311,7 +308,7 @@ exports.getSessionById = async (req, res, next) => {
   }
 };
 
-exports.downloadTaskAttachment = async (req, res) => {
+const downloadTaskAttachment = async (req, res) => {
   try {
     const { id, index } = req.params;
     
@@ -326,10 +323,10 @@ exports.downloadTaskAttachment = async (req, res) => {
     const normalizedDbPath = file.path.replace(/\\/g, '/');
 
     // 2. RESOLVE PATH
-    const filePath = path.resolve(path.join(__dirname, '..', normalizedDbPath));
+    const filePath = path.resolve(path.join(import.meta.dirname, '..', normalizedDbPath));
 
     // Security fix (SV-9): Path traversal guard.
-    const uploadsRoot = path.resolve(path.join(__dirname, '..', 'uploads'));
+    const uploadsRoot = path.resolve(path.join(import.meta.dirname, '..', 'uploads'));
     if (!filePath.startsWith(uploadsRoot + path.sep) && filePath !== uploadsRoot) {
       return res.status(403).json({ message: 'Access denied: invalid file path' });
     }
@@ -361,7 +358,7 @@ exports.downloadTaskAttachment = async (req, res) => {
 };
 
 // NEW: User Timeline Across All Enrolled Classes
-exports.getUserTimeline = async (req, res, next) => {
+const getUserTimeline = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const roles = req.user.roles || [];
@@ -465,3 +462,20 @@ exports.getUserTimeline = async (req, res, next) => {
     next(error);
   }
 };
+
+export default {
+  createSession,
+  getSessionsByClass,
+  getClassInfo,
+  deleteSession,
+  createTask,
+  createMaterial,
+  getTasksBySession,
+  getMaterialsBySession,
+  downloadMaterialFile,
+  updateSession,
+  getTaskById,
+  getSessionById,
+  downloadTaskAttachment,
+  getUserTimeline,
+}

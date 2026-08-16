@@ -1,7 +1,7 @@
 // server/models/nosql/UserSession.js
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const UserSessionSchema = new mongoose.Schema({
+const UserSessionSchema = new Schema({
   ip_address: { type: String, required: true, index: true },
   user_id: { type: Number, index: true },
   user_name: { type: String },
@@ -13,4 +13,4 @@ const UserSessionSchema = new mongoose.Schema({
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
 
-module.exports = mongoose.model('UserSession', UserSessionSchema);
+export default model('UserSession', UserSessionSchema);

@@ -1,70 +1,63 @@
 // server/routes/contentRoutes.js
-const express = require('express');
-const router = express.Router();
-const contentController = require('../controllers/contentController');
-const submissionController = require('../controllers/submissionController');
+import express from 'express';
 
-// Middlewares
-const verifyToken = require('../middleware/authMiddleware');
-const checkRole = require('../middleware/rbacMiddleware');
-const createUploader = require('../middleware/uploadMiddleware');
-const validateMimeType = require('../middleware/validateMimeType'); // 2.7
+// Controllers & Middlewares
+import contentController from '../controllers/contentController.js';
+import submissionController from '../controllers/submissionController.js';
+import verifyToken from '../middleware/authMiddleware.js';
+import checkRole from '../middleware/rbacMiddleware.js';
+import createUploader from '../middleware/uploadMiddleware.js';
+import validateMimeType from '../middleware/validateMimeType.js';
+import { uploadLimiter } from '../middleware/rateLimiter.js';
 
 // Uploaders
 const uploadMaterial = createUploader('materials');
-const uploadTask = createUploader('tasks'); 
-const uploadRateLimiter = require('../middleware/uploadRateLimiter');
+const uploadTask = createUploader('tasks');
+
+const router = express.Router();
 
 router.use(verifyToken);
 
-// =========================================================================
-// 1. SESSION ROUTES (SQL: Pertemuan)
-// =========================================================================
-
 // Create
-router.post('/session', 
-  checkRole(['asdos', 'admin']), 
+router.post('/session',
+  checkRole(['asdos', 'admin']),
   contentController.createSession
 );
 
 // Read (List)
-router.get('/session/list/:id_praktikum', 
+router.get('/session/list/:id_praktikum',
   contentController.getSessionsByClass
 );
 
-router.get('/class-info/:id_praktikum', 
+router.get('/class-info/:id_praktikum',
   contentController.getClassInfo
 );
 
-// NEW: Update (Reschedule)
-router.put('/session/:id', 
-  checkRole(['asdos', 'admin']), 
+// Update (Reschedule)
+router.put('/session/:id',
+  checkRole(['asdos', 'admin']),
   contentController.updateSession
 );
 
 // Delete
-router.delete('/session/:id', 
-  checkRole(['asdos', 'admin']), 
+router.delete('/session/:id',
+  checkRole(['asdos', 'admin']),
   contentController.deleteSession
 );
-
-// =========================================================================
-// 2. CONTENT ROUTES (NoSQL: Materi & Tugas)
-// =========================================================================
 
 // Upload Material
 router.post('/materi',
   checkRole(['asdos', 'admin']),
-  uploadRateLimiter,             // Anti-Abuse: Max 10 uploads / 15 mins
+  uploadLimiter,             // Anti-Abuse: Max 10 uploads / 15 mins
   uploadMaterial.array('files', 5),
   validateMimeType,              // 2.7: Validate real MIME via magic bytes
   contentController.createMaterial
 );
 
 // Create Task
-router.post('/tugas', 
+router.post('/tugas',
   checkRole(['asdos', 'admin']),
-  uploadRateLimiter,             // Anti-Abuse: Max 10 uploads / 15 mins
+  uploadLimiter,             // Anti-Abuse: Max 10 uploads / 15 mins
   uploadTask.array('files', 5),
   validateMimeType,              // 2.7: Validate real MIME via magic bytes
   contentController.createTask
@@ -76,15 +69,10 @@ router.get('/tugas/session/:pertemuan_id', contentController.getTasksBySession);
 
 // Download Material File
 router.get('/materi/:materiId/download/:fileIndex', contentController.downloadMaterialFile);
-
 router.get('/tugas/:id/download/:index', contentController.downloadTaskAttachment);
-
 router.get('/tugas/:id', contentController.getTaskById);
-
 router.get('/me/:taskId', submissionController.getMySubmission);
-
 router.get('/session/:id', contentController.getSessionById);
-
 router.get('/user-timeline', contentController.getUserTimeline);
 
-module.exports = router;
+export default router;

@@ -1,4 +1,5 @@
-module.exports = (sequelize, DataTypes) => {
+// server/models/sql/PraktikumUserRole.js
+export default (sequelize, DataTypes) => {
   const PraktikumUserRole = sequelize.define('PraktikumUserRole', {
     id_user: {
       type: DataTypes.BIGINT.UNSIGNED,

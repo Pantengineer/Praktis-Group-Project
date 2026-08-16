@@ -1,5 +1,5 @@
 // server/config/cors.js
-const cors = require('cors');
+import cors from 'cors';
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000')
     .split(',')
@@ -19,4 +19,4 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization']
 }
 
-module.exports = cors(corsOptions);
+export default cors(corsOptions);

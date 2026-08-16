@@ -1,21 +1,24 @@
 // server/routes/adminRoutes.js
-const express = require('express');
-const router = express.Router();
-const fs = require('fs');
-const path = require('path');
-const verifyToken = require('../middleware/authMiddleware');
-const checkRole = require('../middleware/rbacMiddleware');
-const bcrypt = require('bcryptjs'); // Needed for creating users
+import express from 'express';
+import fs from 'node:fs';
+import path from 'node:path';
+import bcrypt from 'bcryptjs'; // Needed for creating users
 
-// 1. Import Models
-const { User, Role, PraktikumUserRole, Praktikum, UserRole, Pertemuan } = require('../models/sql');
-const Materi = require('../models/nosql/Materi');
-const Tugas = require('../models/nosql/Tugas');
-const Pengumpulan = require('../models/nosql/Pengumpulan');
-const BannedIP = require('../models/nosql/BannedIP');
-const UserSession = require('../models/nosql/UserSession');
-const ApiRequestLog = require('../models/nosql/ApiRequestLog');
-const { extractClientIP } = require('../middleware/ipBanMiddleware');
+// Middleware Imports
+import verifyToken from '../middleware/authMiddleware.js';
+import checkRole from '../middleware/rbacMiddleware.js';
+
+// Model Imports
+import { User, Role, PraktikumUserRole, Praktikum, UserRole, Pertemuan } from '../models/sql/index.js';
+import Materi from '../models/nosql/Materi.js';
+import Tugas from '../models/nosql/Tugas.js';
+import Pengumpulan from '../models/nosql/Pengumpulan.js';
+import BannedIP from '../models/nosql/BannedIP.js';
+import UserSession from '../models/nosql/UserSession.js';
+import ApiRequestLog from '../models/nosql/ApiRequestLog.js';
+import { extractClientIP } from '../middleware/ipBanMiddleware.js';
+
+const router = express.Router();
 
 // ==========================================
 // FEATURE 1: DASHBOARD STATS
@@ -188,7 +191,7 @@ router.get('/storage-stats', verifyToken, checkRole(['admin']), async (req, res)
     });
 
     // Also verify disk folder usage
-    const uploadsDir = path.join(__dirname, '../uploads');
+    const uploadsDir = path.join(import.meta.dirname, '../uploads');
     const diskTotalBytes = getFolderSize(uploadsDir);
     const dbTotalBytes = materiBytes + tugasBytes + pengumpulanBytes;
 
@@ -385,7 +388,7 @@ const deleteFileHandler = async (req, res) => {
     
     let isStaff = rolesList.some(r => r === 'asdos' || r === 'admin');
     if (!isStaff) {
-      const { PraktikumUserRole, Role } = require('../models/sql');
+      const { PraktikumUserRole, Role } = require('../models/sql').default;
       const staffEnrollment = await PraktikumUserRole.findOne({
         where: { id_user: userId },
         include: [{ model: Role, where: { deskripsi: ['asdos', 'admin'] } }]
@@ -401,7 +404,7 @@ const deleteFileHandler = async (req, res) => {
       if (!materi) return res.status(404).json({ message: 'Materi tidak ditemukan' });
 
       if (materi.attachments && materi.attachments[idx]) {
-        const filePath = path.join(__dirname, '..', materi.attachments[idx].path);
+        const filePath = path.join(import.meta.dirname, '..', materi.attachments[idx].path);
         if (fs.existsSync(filePath)) {
           try { fs.unlinkSync(filePath); } catch (e) {}
         }
@@ -420,7 +423,7 @@ const deleteFileHandler = async (req, res) => {
       if (!tugas) return res.status(404).json({ message: 'Tugas tidak ditemukan' });
 
       if (tugas.attachments && tugas.attachments[idx]) {
-        const filePath = path.join(__dirname, '..', tugas.attachments[idx].path);
+        const filePath = path.join(import.meta.dirname, '..', tugas.attachments[idx].path);
         if (fs.existsSync(filePath)) {
           try { fs.unlinkSync(filePath); } catch (e) {}
         }
@@ -438,7 +441,7 @@ const deleteFileHandler = async (req, res) => {
       }
 
       if (submission.file && submission.file.path) {
-        const filePath = path.join(__dirname, '..', submission.file.path);
+        const filePath = path.join(import.meta.dirname, '..', submission.file.path);
         if (fs.existsSync(filePath)) {
           try { fs.unlinkSync(filePath); } catch (e) {}
         }
@@ -1097,4 +1100,4 @@ router.get('/api-traffic-stats', verifyToken, checkRole(['admin']), async (req, 
   }
 });
 
-module.exports = router;
+export default router;

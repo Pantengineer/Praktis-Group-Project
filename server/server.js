@@ -1,23 +1,23 @@
 // server/server.js
-const express = require('express');
-const helmet = require('helmet');
-const cookieParser = require('cookie-parser');
+import express, { json } from 'express';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 
 // Configs & Utils
-const env = require('./config/env');
-const logger = require('./utils/logger');
-const { sequelize, connectSQLWithRetry } = require('./config/db.sql');
-const connectMongo = require('./config/db.mongo');
-const corsMiddleware = require('./config/cors')
+import env from './config/env.js';
+import logger from './utils/logger.js';
+import { sequelize, connectSQLWithRetry } from './config/db.sql.js';
+import connectMongo from './config/db.mongo.js';
+import corsMiddleware from './config/cors.js';
 
 // Middleware
-const { globalLimiter } = require('./middleware/apiRateLimiter');
-const { ipBanMiddleware } = require('./middleware/ipBanMiddleware');
-const { apiLoggerMiddleware } = require('./middleware/apiLoggerMiddleware');
-const errorHandler = require('./middleware/errorHandler');
+import { globalLimiter } from './middleware/rateLimiter.js';
+import { ipBanMiddleware } from './middleware/ipBanMiddleware.js';
+import { apiLoggerMiddleware } from './middleware/apiLoggerMiddleware.js';
+import errorHandler from './middleware/errorHandler.js';
 
 // Routes
-const apiRoutes = require('./routes'); // should automatically resolve to routes/index.js
+import apiRoutes from './routes/index.js';
 
 // Initialize App
 const app = express();
@@ -25,7 +25,7 @@ const app = express();
 // Global Middleware
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(corsMiddleware);
-app.use(express.json());
+app.use(json());
 app.use(cookieParser()); // Parse cookies for HttpOnly JWT (2.1)
 
 // API Middleware
