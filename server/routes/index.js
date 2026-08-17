@@ -1,3 +1,4 @@
+// server/routes/index.js
 import express from 'express';
 
 import authRoutes from './authRoutes.js';
