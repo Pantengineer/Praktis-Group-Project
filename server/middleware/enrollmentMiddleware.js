@@ -1,5 +1,5 @@
 // server/middleware/enrollmentMiddleware.js
-const { PraktikumUserRole, Role, Pertemuan } = require('../models/sql');
+import { PraktikumUserRole, Role, Pertemuan } from '../models/sql/index.js';
 
 /**
  * Ensures user is enrolled in the class linked to the request.
@@ -54,4 +54,6 @@ const checkEnrollment = (requiredRoles = []) => {
   };
 };
 
-module.exports = checkEnrollment;
+export default {
+  checkEnrollment,
+}

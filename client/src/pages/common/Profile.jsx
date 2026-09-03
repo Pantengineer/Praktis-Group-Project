@@ -46,7 +46,7 @@ const Profile = () => {
     const fetchProfile = async () => {
         try {
             setLoading(true);
-            const endpoint = isViewingOther ? `/api/users/admin/users/${id}` : '/api/users/profile';
+            const endpoint = isViewingOther ? `/api/admin/users/${id}` : '/api/users/profile';
             const res = await api.get(endpoint);
 
             let userData = {};
@@ -85,7 +85,7 @@ const Profile = () => {
         e.preventDefault();
         try {
             if (isViewingOther) {
-                await api.put(`/api/users/admin/users/${profile.id_user}`, editForm);
+                await api.put(`/api/admin/users/${profile.id_user}`, editForm);
             } else {
                 await api.put('/api/users/profile', editForm);
             }

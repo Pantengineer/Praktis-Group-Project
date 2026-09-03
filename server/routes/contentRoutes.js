@@ -2,13 +2,13 @@
 import express from 'express';
 
 // Controllers & Middlewares
-import contentController from '../controllers/contentController.js';
-import submissionController from '../controllers/submissionController.js';
 import verifyToken from '../middleware/authMiddleware.js';
 import checkRole from '../middleware/rbacMiddleware.js';
 import createUploader from '../middleware/uploadMiddleware.js';
 import validateMimeType from '../middleware/validateMimeType.js';
 import { uploadLimiter } from '../middleware/rateLimiter.js';
+import contentController from '../controllers/contentController.js';
+import submissionController from '../controllers/submissionController.js';
 
 // Uploaders
 const uploadMaterial = createUploader('materials');

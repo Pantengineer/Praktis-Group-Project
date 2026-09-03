@@ -2,9 +2,10 @@
 import express from 'express';
 
 // Controllers & Middlewares
-import adminController from '../controllers/adminController.js';
 import verifyToken from '../middleware/authMiddleware.js';
 import checkRole from '../middleware/rbacMiddleware.js';
+import adminController from '../controllers/adminController.js';
+import userController from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -66,11 +67,17 @@ router.delete('/mahasiswa_praktikum', verifyToken, checkRole(['admin']), adminCo
 // FEATURE 3: USER CRUD
 // ==========================================
 
-// Get All Users (with pagination — 2.9)
-router.get('/users', verifyToken, checkRole(['admin']), adminController.getAllUsers);
-
 // Create New User
 router.post('/users', verifyToken, checkRole(['admin']), adminController.createUser);
+
+// Get All Users
+router.get('/users', verifyToken, checkRole(['admin']), adminController.getAllUsers);
+
+// Get User Details
+router.get('/users/:id', verifyToken, checkRole(['admin']), userController.getUserById);
+
+// Update User
+router.put('/users/:id', verifyToken, checkRole(['admin']), userController.updateUserByAdmin);
 
 // Delete User
 router.delete('/users/:id', verifyToken, checkRole(['admin']), adminController.deleteUser);

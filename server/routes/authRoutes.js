@@ -2,9 +2,9 @@
 import express from 'express';
 
 // Controllers & Middlewares
-import authController from '../controllers/authController.js';
 import verifyToken from '../middleware/authMiddleware.js';
 import { loginLimiter } from '../middleware/rateLimiter.js';
+import authController from '../controllers/authController.js';
 
 const router = express.Router();
 
