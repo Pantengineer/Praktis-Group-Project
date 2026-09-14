@@ -1,5 +1,5 @@
 // server/models/sql/Pertemuan.js
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const Pertemuan = sequelize.define('Pertemuan', {
     id_pertemuan: {
       type: DataTypes.BIGINT.UNSIGNED,

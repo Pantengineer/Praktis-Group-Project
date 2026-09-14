@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const PengumpulanSchema = new mongoose.Schema({
+const PengumpulanSchema = new Schema({
   tugas_id: { 
-    type: mongoose.Schema.Types.ObjectId, 
+    type: Schema.Types.ObjectId, 
     ref: 'Tugas',
     required: true,
     index: true
@@ -51,4 +51,4 @@ const PengumpulanSchema = new mongoose.Schema({
 // Compound index to prevent duplicate submissions
 PengumpulanSchema.index({ tugas_id: 1, student_id: 1 }, { unique: true });
 
-module.exports = mongoose.model('Pengumpulan', PengumpulanSchema);
+export default model('Pengumpulan', PengumpulanSchema);

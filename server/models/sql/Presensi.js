@@ -1,5 +1,5 @@
 // server/models/sql/Presensi.js
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const Presensi = sequelize.define('Presensi', {
     id_presensi: {
       type: DataTypes.BIGINT.UNSIGNED,

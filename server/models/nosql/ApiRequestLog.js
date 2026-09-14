@@ -1,7 +1,7 @@
 // server/models/nosql/ApiRequestLog.js
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const ApiRequestLogSchema = new mongoose.Schema({
+const ApiRequestLogSchema = new Schema({
   ip_address: { type: String, required: true, index: true },
   method: { type: String, required: true }, // GET, POST, PUT, DELETE
   endpoint: { type: String, required: true },
@@ -18,4 +18,6 @@ const ApiRequestLogSchema = new mongoose.Schema({
 // TTL index: auto-delete logs older than 7 days (604800 seconds)
 ApiRequestLogSchema.index({ timestamp: 1 }, { expireAfterSeconds: 604800 });
 
-module.exports = mongoose.model('ApiRequestLog', ApiRequestLogSchema);
+const ApiRequestLog = model('ApiRequestLog', ApiRequestLogSchema);
+
+export default ApiRequestLog;

@@ -1,5 +1,5 @@
 // server/middleware/apiLoggerMiddleware.js
-const ApiRequestLog = require('../models/nosql/ApiRequestLog');
+import ApiRequestLog from '../models/nosql/ApiRequestLog.js';
 
 const apiLoggerMiddleware = (req, res, next) => {
   const startTime = Date.now();
@@ -12,7 +12,7 @@ const apiLoggerMiddleware = (req, res, next) => {
       const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || req.socket.remoteAddress || '127.0.0.1';
 
       // Asynchronously log request to MongoDB without blocking
-      ApiRequestLog.create({
+      ApiRequestLog({
         ip_address: ip,
         method: req.method,
         endpoint: req.originalUrl || req.url,
@@ -34,4 +34,4 @@ const apiLoggerMiddleware = (req, res, next) => {
   next();
 };
 
-module.exports = { apiLoggerMiddleware };
+export { apiLoggerMiddleware };

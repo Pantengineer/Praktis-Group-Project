@@ -1,4 +1,4 @@
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const Praktikum = sequelize.define('Praktikum', {
     id_praktikum: {
       type: DataTypes.BIGINT.UNSIGNED,

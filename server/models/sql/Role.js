@@ -1,5 +1,5 @@
 // server/models/sql/Role.js
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const Role = sequelize.define('Role', {
     id_role: {
       type: DataTypes.TINYINT.UNSIGNED, // Matches SQL 'tinyint(3) UNSIGNED'

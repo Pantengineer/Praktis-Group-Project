@@ -1,5 +1,5 @@
 // server/middleware/errorHandler.js
-const multer = require('multer');
+import multer from 'multer';
 
 const errorHandler = (err, req, res, next) => {
   console.error('[Error Middleware]:', err.message || err);
@@ -44,4 +44,4 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-module.exports = errorHandler;
+export default errorHandler;

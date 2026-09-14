@@ -1,22 +1,27 @@
-const { Sequelize } = require('sequelize');
+// Import Sequelize Connection
+import { sequelize } from '../../config/db.sql.js';
+import { DataTypes } from 'sequelize';
 
-// 1. IMPORT YOUR EXISTING CONNECTION
-// instead of treating it like a config file
-const sequelize = require('../../config/db.sql'); 
+// Import SQL Models
+import UserModel from './User.js';
+import RoleModel from './Role.js';
+import UserRoleModel from './UserRole.js';
+import PraktikumModel from './Praktikum.js';
+import PraktikumUserRoleModel from './PraktikumUserRole.js';
+import PertemuanModel from './Pertemuan.js';
+import PresensiModel from './Presensi.js';
+import PresensiStatusModel from './PresensiStatus.js';
 
-// 2. Initialize Models
-// Pass the existing 'sequelize' connection to the factory functions
-const User = require('./User')(sequelize, Sequelize);
-const Role = require('./Role')(sequelize, Sequelize);
-const UserRole = require('./UserRole')(sequelize, Sequelize);
-const Praktikum = require('./Praktikum')(sequelize, Sequelize);
-const PraktikumUserRole = require('./PraktikumUserRole')(sequelize, Sequelize);
-const Pertemuan = require('./Pertemuan')(sequelize, Sequelize);
-const Presensi = require('./Presensi')(sequelize, Sequelize);
-const PresensiStatus = require('./PresensiStatus')(sequelize, Sequelize);
+const User = UserModel(sequelize, DataTypes);
+const Role = RoleModel(sequelize, DataTypes);
+const UserRole = UserRoleModel(sequelize, DataTypes);
+const Praktikum = PraktikumModel(sequelize, DataTypes);
+const PraktikumUserRole = PraktikumUserRoleModel(sequelize, DataTypes);
+const Pertemuan = PertemuanModel(sequelize, DataTypes);
+const Presensi = PresensiModel(sequelize, DataTypes);
+const PresensiStatus = PresensiStatusModel(sequelize, DataTypes);
 
-// 3. Define Associations
-
+// Define Associations
 // A. Global Roles
 User.belongsToMany(Role, { through: UserRole, foreignKey: 'id_user', otherKey: 'id_role' });
 Role.belongsToMany(User, { through: UserRole, foreignKey: 'id_role', otherKey: 'id_user' });
@@ -47,10 +52,10 @@ Presensi.belongsTo(User, { foreignKey: 'id_user' });
 PresensiStatus.hasMany(Presensi, { foreignKey: 'id_status' });
 Presensi.belongsTo(PresensiStatus, { foreignKey: 'id_status' });
 
-// 4. Export
-module.exports = {
+// Export
+export {
   sequelize,
-  Sequelize,
+  DataTypes,
   User,
   Role,
   UserRole,

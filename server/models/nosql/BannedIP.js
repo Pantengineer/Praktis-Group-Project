@@ -1,7 +1,7 @@
 // server/models/nosql/BannedIP.js
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const BannedIPSchema = new mongoose.Schema({
+const BannedIPSchema = new Schema({
   ip_address: { type: String, required: true, unique: true, index: true },
   reason: { type: String, default: 'Dilarang oleh Administrator' },
   banned_by: { type: Number }, // Admin User ID
@@ -13,4 +13,6 @@ const BannedIPSchema = new mongoose.Schema({
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
 
-module.exports = mongoose.model('BannedIP', BannedIPSchema);
+const BannedIP = model('BannedIP', BannedIPSchema);
+
+export default BannedIP;
