@@ -208,11 +208,3 @@ npm run dev
   - Initial Release.
 
 ---
-
-## Authors ✍️
-
-- **Daffa Ibnu Abdillah** - *Backend Dev*
-- **Ilham Buwana Putra** - *Database & QA*
-- **Lidya Stephanie Arthania** - *Product Owner*
-- **Muhammad Alfi Anfahsa** - *Scrum Master*
-- **Muhammad Rafli Pradana** - *Frontend Dev*
