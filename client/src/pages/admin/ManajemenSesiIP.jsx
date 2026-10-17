@@ -10,6 +10,7 @@ import {
   CartesianGrid,
   Legend
 } from 'recharts';
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 const ManajemenSesiIP = () => {
   const [activeSessions, setActiveSessions] = useState([]);
@@ -490,30 +491,32 @@ const ManajemenSesiIP = () => {
             </div>
 
             <div style={{ width: '100%', height: 340 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={formattedTimeSeries} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorReq" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
-                    </linearGradient>
-                    <linearGradient id="colorBw" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="displayTime" stroke="#64748b" style={{ fontSize: '0.78rem' }} />
-                  <YAxis yAxisId="req" stroke="#3b82f6" style={{ fontSize: '0.78rem' }} label={{ value: 'Permintaan API', angle: -90, position: 'insideLeft', style: { fill: '#3b82f6', fontSize: '0.75rem' } }} />
-                  <YAxis yAxisId="bw" orientation="right" stroke="#10b981" style={{ fontSize: '0.78rem' }} label={{ value: 'Bandwidth (KB)', angle: 90, position: 'insideRight', style: { fill: '#10b981', fontSize: '0.75rem' } }} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: '#1e293b', borderRadius: '12px', border: 'none', color: '#fff', fontSize: '0.82rem' }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: '0.82rem', paddingTop: '10px' }} />
-                  <Area yAxisId="req" type="monotone" dataKey="requests" name="Permintaan API" stroke="#3b82f6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorReq)" />
-                  <Area yAxisId="bw" type="monotone" dataKey="bandwidthKB" name="Bandwidth (KB)" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorBw)" />
-                </AreaChart>
-              </ResponsiveContainer>
+              <ErrorBoundary fallback={<div className="d-flex h-100 justify-content-center align-items-center text-muted"><i className="bi bi-activity me-2"></i>Grafik aktivitas API sedang tidak dapat dimuat.</div>}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={formattedTimeSeries} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorReq" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
+                      </linearGradient>
+                      <linearGradient id="colorBw" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="displayTime" stroke="#64748b" style={{ fontSize: '0.78rem' }} />
+                    <YAxis yAxisId="req" stroke="#3b82f6" style={{ fontSize: '0.78rem' }} label={{ value: 'Permintaan API', angle: -90, position: 'insideLeft', style: { fill: '#3b82f6', fontSize: '0.75rem' } }} />
+                    <YAxis yAxisId="bw" orientation="right" stroke="#10b981" style={{ fontSize: '0.78rem' }} label={{ value: 'Bandwidth (KB)', angle: 90, position: 'insideRight', style: { fill: '#10b981', fontSize: '0.75rem' } }} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#1e293b', borderRadius: '12px', border: 'none', color: '#fff', fontSize: '0.82rem' }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: '0.82rem', paddingTop: '10px' }} />
+                    <Area yAxisId="req" type="monotone" dataKey="requests" name="Permintaan API" stroke="#3b82f6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorReq)" />
+                    <Area yAxisId="bw" type="monotone" dataKey="bandwidthKB" name="Bandwidth (KB)" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorBw)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </ErrorBoundary>
             </div>
           </div>
 
