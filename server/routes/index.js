@@ -7,6 +7,7 @@ import contentRoutes from './contentRoutes.js';
 import submissionRoutes from './submissionRoutes.js';
 import userRoutes from './userRoutes.js';
 import attendanceRoutes from './attendanceRoutes.js';
+import settingRoutes from './settingRoutes.js';
 
 const router = express.Router();
 
@@ -16,5 +17,6 @@ router.use('/content', contentRoutes);
 router.use('/submission', submissionRoutes);
 router.use('/users', userRoutes);
 router.use('/attendance', attendanceRoutes);
+router.use('/settings', settingRoutes);
 
 export default router;

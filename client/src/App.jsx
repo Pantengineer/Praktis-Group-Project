@@ -5,6 +5,11 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Pages - Auth
 import Login from './pages/auth/Login';
 import RoleSelection from './pages/auth/RoleSelection';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
+
+// Pages - Public
+import Faq from './pages/public/Faq';
 
 // Pages - Admin
 import LayoutAdmin from './layouts/LayoutAdmin';
@@ -14,6 +19,7 @@ import ManajemenPraktikum from './pages/admin/ManajemenPraktikum';
 import ManajemenMahasiswaPraktikum from './pages/admin/ManajemenMahasiswaPraktikum';
 import ManajemenBerkas from './pages/admin/ManajemenBerkas';
 import ManajemenSesiIP from './pages/admin/ManajemenSesiIP';
+import PengaturanKontak from './pages/admin/PengaturanKontak';
 
 // Pages - Asdos
 import LayoutAsdos from './layouts/LayoutAsdos';
@@ -46,6 +52,9 @@ function App() {
       {/* --- Public Routes --- */}
       <Route path="/" element={<Login />} />
       <Route path="/auth/login" element={<Login />} />
+      <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+      <Route path="/auth/reset-password" element={<ResetPassword />} />
+      <Route path="/faq" element={<Faq />} />
 
       {/* --- Role Selection --- */}
       <Route
@@ -78,6 +87,7 @@ function App() {
         {/* Note: It inherits the 'admin' protection from the parent route */}
         <Route path="user/:id" element={<Profile />} />
         <Route path="praktikum/:id/mahasiswa" element={<ManajemenMahasiswaPraktikum />} />
+        <Route path="contact-settings" element={<PengaturanKontak />} />
 
       </Route>
 

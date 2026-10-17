@@ -11,6 +11,8 @@ import PraktikumUserRoleModel from './PraktikumUserRole.js';
 import PertemuanModel from './Pertemuan.js';
 import PresensiModel from './Presensi.js';
 import PresensiStatusModel from './PresensiStatus.js';
+import PasswordResetModel from './PasswordReset.js';
+import SystemSettingModel from './SystemSetting.js';
 
 const User = UserModel(sequelize, DataTypes);
 const Role = RoleModel(sequelize, DataTypes);
@@ -20,6 +22,8 @@ const PraktikumUserRole = PraktikumUserRoleModel(sequelize, DataTypes);
 const Pertemuan = PertemuanModel(sequelize, DataTypes);
 const Presensi = PresensiModel(sequelize, DataTypes);
 const PresensiStatus = PresensiStatusModel(sequelize, DataTypes);
+const PasswordReset = PasswordResetModel(sequelize, DataTypes);
+const SystemSetting = SystemSettingModel(sequelize, DataTypes);
 
 // Define Associations
 // A. Global Roles
@@ -52,6 +56,10 @@ Presensi.belongsTo(User, { foreignKey: 'id_user' });
 PresensiStatus.hasMany(Presensi, { foreignKey: 'id_status' });
 Presensi.belongsTo(PresensiStatus, { foreignKey: 'id_status' });
 
+// E. Password Resets
+User.hasMany(PasswordReset, { foreignKey: 'id_user', onDelete: 'CASCADE' });
+PasswordReset.belongsTo(User, { foreignKey: 'id_user' });
+
 // Export
 export {
   sequelize,
@@ -63,5 +71,7 @@ export {
   PraktikumUserRole,
   Pertemuan,
   Presensi,
-  PresensiStatus
+  PresensiStatus,
+  PasswordReset,
+  SystemSetting
 };

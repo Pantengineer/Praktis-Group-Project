@@ -43,6 +43,7 @@ const startServer = async () => {
   try {
     await connectMongo();
     await connectSQLWithRetry(sequelize);
+    await sequelize.sync(); // Safely ensure all defined SQL tables exist
 
     app.listen(env.port, () => {
       logger.info(`🚀 Server running in ${env.nodeEnv} mode on port ${env.port}`);
