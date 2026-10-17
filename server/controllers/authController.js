@@ -77,7 +77,9 @@ async function forgotPassword(req, res) {
         message: 'Kredensial Gmail SMTP salah (535 Bad Credentials). Gmail memerlukan Sandi Aplikasi (App Password). Periksa log server untuk link reset manual.'
       });
     }
-    return res.status(500).json({ message: 'Gagal memproses permintaan reset password.' });
+    return res.status(500).json({ 
+      message: `Gagal mengirim email: ${error.message || 'Koneksi SMTP bermasalah'}. Silakan cek docker logs server untuk tautan reset password darurat.` 
+    });
   }
 }
 

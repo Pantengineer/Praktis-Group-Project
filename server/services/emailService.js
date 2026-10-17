@@ -7,16 +7,29 @@ let transporter = null;
 
 // Initialize transporter if SMTP configuration is present
 const initTransporter = () => {
-  if (env.email.host && env.email.user && env.email.pass) {
-    transporter = nodemailer.createTransport({
-      host: env.email.host,
-      port: env.email.port,
-      secure: env.email.secure,
-      auth: {
-        user: env.email.user,
-        pass: env.email.pass,
-      },
-    });
+  const user = env.email.user;
+  const pass = (env.email.pass || '').replace(/\s+/g, '');
+
+  if (user && pass) {
+    if (env.email.host?.includes('gmail') || user.includes('@gmail.com')) {
+      transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user,
+          pass,
+        },
+      });
+    } else if (env.email.host) {
+      transporter = nodemailer.createTransport({
+        host: env.email.host,
+        port: env.email.port,
+        secure: env.email.secure,
+        auth: {
+          user,
+          pass,
+        },
+      });
+    }
   } else {
     transporter = null;
   }
