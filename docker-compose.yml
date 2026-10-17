@@ -34,7 +34,7 @@ services:
       - SMTP_PORT=${SMTP_PORT:-587}
       - SMTP_SECURE=${SMTP_SECURE:-false}
       - SMTP_USER=${SMTP_USER:-projectpraktis@gmail.com}
-      - SMTP_PASS=${SMTP_PASS:-praktis101700605}
+      - SMTP_PASS=${SMTP_PASS:-bpkervwlquorkpje}
       - EMAIL_FROM=${EMAIL_FROM:-"PRAKTIS Support <projectpraktis@gmail.com>"}
     depends_on:
       - mysql
