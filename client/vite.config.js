@@ -16,10 +16,21 @@ export default defineConfig(({ mode }) => {
         'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
         'react-is': path.resolve(__dirname, './node_modules/react-is'),
       },
-      dedupe: ['react', 'react-dom', 'react-is'],
+      dedupe: ['react', 'react-dom', 'react-is', 'react-router', 'react-router-dom'],
     },
     optimizeDeps: {
-      include: ['react', 'react-dom', 'react-is', 'recharts', 'react-calendar'],
+      include: [
+        'react',
+        'react-dom',
+        'react-dom/client',
+        'react-router',
+        'react-router-dom',
+        'react-is',
+        'recharts',
+        'react-calendar',
+        'framer-motion',
+        'axios',
+      ],
       force: true,
     },
     server: {
