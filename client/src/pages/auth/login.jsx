@@ -1,10 +1,11 @@
-// client/src/pages/auth/Login.jsx
 import React, { useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../utils/api';
 import { useAuth } from '../../context/authContext';
 import { motion } from 'framer-motion';
 import '../../assets/css/Login.css';
 import logoPA from '../../assets/img/logo_pa.jpeg';
+import ContactSupportModal from '../../components/ContactSupportModal';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showContactModal, setShowContactModal] = useState(false);
 
     // Ref for draggable constraints container
     const heroRef = useRef(null);
@@ -223,14 +225,31 @@ const Login = () => {
                                 )}
                             </button>
 
-                            <div className="text-center mt-4">
-                                <a 
-                                    href="#" 
-                                    onClick={(e) => { e.preventDefault(); alert("Silakan hubungi administrator laboratorium untuk reset password Anda."); }} 
-                                    className="text-decoration-none small text-muted hover-opacity-100"
+                            <div className="d-flex justify-content-between align-items-center mt-4">
+                                <Link 
+                                    to="/faq" 
+                                    className="text-decoration-none small text-muted hover-opacity-100 d-inline-flex align-items-center gap-1"
+                                >
+                                    <i className="bi bi-question-circle"></i>
+                                    <span>Pusat Bantuan FAQ</span>
+                                </Link>
+                                <Link 
+                                    to="/auth/forgot-password" 
+                                    className="text-decoration-none small text-primary fw-semibold"
                                 >
                                     Lupa Password?
-                                </a>
+                                </Link>
+                            </div>
+
+                            <div className="text-center mt-3 pt-3 border-top">
+                                <button 
+                                    type="button" 
+                                    onClick={() => setShowContactModal(true)} 
+                                    className="btn btn-link p-0 text-decoration-none small text-muted d-inline-flex align-items-center gap-1"
+                                >
+                                    <i className="bi bi-whatsapp text-success fs-6"></i>
+                                    <span>Butuh Bantuan Lab? Hubungi Kami</span>
+                                </button>
                             </div>
                         </form>
 
@@ -241,6 +260,12 @@ const Login = () => {
                 </div>
 
             </div>
+
+            {/* Contact Support Modal */}
+            <ContactSupportModal 
+                isOpen={showContactModal} 
+                onClose={() => setShowContactModal(false)} 
+            />
         </div>
     );
 };

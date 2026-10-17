@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import fs from 'fs';
 import path from 'path';
 
-import { sequelize, User, Role, UserRole, PresensiStatus, Praktikum, PraktikumUserRole, Pertemuan } from './models/sql/index.js';
+import { sequelize, User, Role, UserRole, PresensiStatus, Praktikum, PraktikumUserRole, Pertemuan, SystemSetting } from './models/sql/index.js';
 import connectMongo from './config/db.mongo.js';
 import Materi from './models/nosql/Materi.js';
 import Tugas from './models/nosql/Tugas.js';
@@ -56,22 +56,38 @@ async function seed() {
     console.log('⏳ Seeding Users (Admin, Mahasiswa)...');
 
     // 1 Admin
-    const adminPass = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+    const adminName = process.env.ADMIN_NAME || 'Super Admin';
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@admin.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    const adminNim = process.env.ADMIN_NIM || '0000000001';
+
+    const adminPass = await bcrypt.hash(adminPassword, 10);
     const adminRole = await Role.findOne({ where: { deskripsi: 'admin' } });
     const adminUser = await User.create({
-      nama: process.env.ADMIN_NAME, email: process.env.ADMIN_EMAIL, password: adminPass, nim: process.env.ADMIN_NIM
+      nama: adminName,
+      email: adminEmail,
+      password: adminPass,
+      nim: adminNim,
+      prodi: 'Informatika',
+      angkatan: 2020
     });
     await UserRole.create({ id_user: adminUser.id_user, id_role: adminRole.id_role });
 
     // 5 Mahasiswa
-    const mhsPass = await bcrypt.hash(process.env.MHS_PASSWORD, 10);
+    const mhsPassword = process.env.MHS_PASSWORD || 'mhs123';
+    const mhsPass = await bcrypt.hash(mhsPassword, 10);
     const mhsRole = await Role.findOne({ where: { deskripsi: 'mahasiswa' } });
     const asdosRole = await Role.findOne({ where: { deskripsi: 'asdos' } });
 
     const mhsUsers = [];
     for (let i = 1; i <= 5; i++) {
       const u = await User.create({
-        nama: `Mahasiswa ${i}`, email: `mhs${i}@mhs.com`, password: mhsPass, nim: `123200100${i}`, prodi: 'Informatika', angkatan: 2023
+        nama: `Mahasiswa ${i}`,
+        email: `mhs${i}@mhs.com`,
+        password: mhsPass,
+        nim: `123200100${i}`,
+        prodi: 'Informatika',
+        angkatan: 2023
       });
       await UserRole.create({ id_user: u.id_user, id_role: mhsRole.id_role }); // GLOBAL ROLE is always mahasiswa
       mhsUsers.push(u);
@@ -89,7 +105,6 @@ async function seed() {
         sessions.push({
           id_praktikum: praktikum.id_praktikum,
           sesi_ke: i + 1,
-          judul_pertemuan: `Pertemuan ${i + 1}`,
           tanggal: sessionDate,
           waktu_mulai: waktu_mulai,
           waktu_selesai: waktu_selesai,
@@ -109,7 +124,7 @@ async function seed() {
       sks: 3,
       semester: 6
     });
-    await generateSessions(p1, '2026-08-01', '08:00', '10:00');
+    await generateSessions(p1, '2026-08-03', '08:00', '10:00');
 
     // Praktikum 2
     const p2 = await Praktikum.create({
@@ -121,7 +136,7 @@ async function seed() {
       sks: 3,
       semester: 4
     });
-    await generateSessions(p2, '2026-08-03', '13:00', '15:00');
+    await generateSessions(p2, '2026-08-05', '13:00', '15:00');
 
     console.log('✅ Praktikum and 10 weekly sessions per Praktikum generated.');
 
@@ -141,6 +156,35 @@ async function seed() {
     }
 
     console.log('✅ Users enrolled contextually (Asdos and Mahasiswa).');
+
+    console.log('⏳ Seeding System Settings (Contact Info)...');
+    await SystemSetting.bulkCreate([
+      {
+        setting_key: 'contact_phone',
+        setting_value: '081234567890',
+        deskripsi: 'Nomor WhatsApp / Kontak Administrator Laboratorium',
+        is_public: true
+      },
+      {
+        setting_key: 'contact_email',
+        setting_value: 'lab@praktis.ac.id',
+        deskripsi: 'Email Dukungan / Layanan Administrator Laboratorium',
+        is_public: true
+      },
+      {
+        setting_key: 'contact_helpdesk_hours',
+        setting_value: 'Senin - Jumat, 08:00 - 16:00 WIB',
+        deskripsi: 'Jam Operasional Layanan Helpdesk Laboratorium',
+        is_public: true
+      },
+      {
+        setting_key: 'contact_whatsapp_message',
+        setting_value: 'Halo Admin PRAKTIS, saya membutuhkan bantuan terkait praktikum.',
+        deskripsi: 'Pesan Awal Otomatis Tautan WhatsApp',
+        is_public: true
+      }
+    ]);
+    console.log('✅ System Settings seeded.');
 
     console.log('🎉 Seeding completed successfully!');
     process.exit(0);

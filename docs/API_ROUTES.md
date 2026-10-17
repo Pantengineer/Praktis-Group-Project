@@ -11,10 +11,24 @@ The **Source** column links to the route file.
 
 ## `/api/auth`
 
-| Method | Path            | Auth Required | Allowed Roles     | Notes                     | Source        |
-| ------ | --------------- | ------------- | ----------------- | ------------------------- | ------------- |
-| POST   | /api/auth/login | No            | -                 | User login                | authRoutes.js |
-| GET    | /api/auth/me    | Yes           | Any authenticated | Token test / current user | authRoutes.js |
+| Method | Path                                | Auth Required | Allowed Roles     | Notes                                   | Source        |
+| ------ | ----------------------------------- | ------------- | ----------------- | --------------------------------------- | ------------- |
+| POST   | /api/auth/login                     | No            | -                 | User login                              | authRoutes.js |
+| POST   | /api/auth/logout                    | No            | -                 | Clear HttpOnly auth cookie              | authRoutes.js |
+| GET    | /api/auth/me                        | Yes           | Any authenticated | Token test / current user               | authRoutes.js |
+| POST   | /api/auth/forgot-password           | No            | -                 | Request password reset email            | authRoutes.js |
+| GET    | /api/auth/verify-reset-token/:token | No            | -                 | Validate reset token expiry and status  | authRoutes.js |
+| POST   | /api/auth/reset-password            | No            | -                 | Execute password update via reset token | authRoutes.js |
+
+---
+
+## `/api/settings`
+
+| Method | Path                  | Auth Required | Allowed Roles     | Notes                                   | Source           |
+| ------ | --------------------- | ------------- | ----------------- | --------------------------------------- | ---------------- |
+| GET    | /api/settings/contact | No            | Any / Public      | Retrieve lab contact & WhatsApp info    | settingRoutes.js |
+| PUT    | /api/settings/contact | Yes           | admin             | Update lab contact info & WhatsApp msg  | settingRoutes.js |
+| GET    | /api/settings/all     | Yes           | admin             | Retrieve all system settings key-values | settingRoutes.js |
 
 ---
 

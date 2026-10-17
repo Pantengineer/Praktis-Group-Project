@@ -121,6 +121,11 @@ const Header = () => {
                   </Link>
                 </li>
               )}
+              <li>
+                <Link className="dropdown-item" to="/faq">
+                  <i className="bi bi-question-circle me-2"></i>Bantuan &amp; FAQ
+                </Link>
+              </li>
               <li><hr className="dropdown-divider" /></li>
               <li>
                 <button className="dropdown-item text-danger" onClick={() => logout && logout()}>

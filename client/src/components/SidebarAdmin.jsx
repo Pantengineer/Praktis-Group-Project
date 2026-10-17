@@ -50,6 +50,12 @@ const SidebarAdmin = () => {
                     label="Keamanan & Sesi IP" 
                 />
 
+                <SidebarNavLink 
+                    to="/admin/contact-settings" 
+                    icon="bi-headset" 
+                    label="Kontak & Helpdesk" 
+                />
+
             </div>
         </div>
     );
