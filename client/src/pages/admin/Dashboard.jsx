@@ -196,7 +196,7 @@ const Dashboard = () => {
                   </div>
                   <h3 className="fw-bold mb-2">
                     {storageStats ? `${(storageStats.totalUsedBytes / (1024 * 1024 * 1024)).toFixed(2)} GB` : '0 GB'}
-                    <span className="fs-6 opacity-50 fw-normal ms-1">/ {(storageStats?.maxStorageMB / 1024).toFixed(1)} GB</span>
+                    <span className="fs-6 opacity-50 fw-normal ms-1">/ {((storageStats?.maxStorageMB || 5000) / 1024).toFixed(1)} GB</span>
                   </h3>
 
                   {/* Progress Bar */}

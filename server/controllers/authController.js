@@ -13,7 +13,7 @@ const COOKIE_NAME = 'auth_token';
 const COOKIE_OPTIONS = {
   httpOnly: true,       // Mitigates XSS token theft
   secure: process.env.NODE_ENV === 'production',   // HTTPS only in production
-  sameSite: 'strict',  // CSRF mitigation
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   maxAge: 24 * 60 * 60 * 1000  // 24 hours in ms
 };
 

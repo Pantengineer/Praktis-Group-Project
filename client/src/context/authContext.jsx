@@ -14,10 +14,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuthSession = async () => {
       try {
-        // Clean up legacy localStorage keys to eliminate security vulnerabilities
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-
         const response = await api.get('/api/auth/me');
         if (response.data && response.data.user) {
           setUser(response.data.user);
@@ -25,7 +21,18 @@ export const AuthProvider = ({ children }) => {
           setUser(null);
         }
       } catch (error) {
-        setUser(null);
+        // Fallback to localStorage if cookie-based check failed
+        const savedUser = localStorage.getItem('user');
+        const token = localStorage.getItem('token');
+        if (savedUser && token) {
+          try {
+            setUser(JSON.parse(savedUser));
+          } catch {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
       } finally {
         setLoading(false);
       }
@@ -36,9 +43,12 @@ export const AuthProvider = ({ children }) => {
 
   // 2. Login Function
   const login = (newToken, userData) => {
-    // Purge disk storage — session is authenticated via HttpOnly cookie
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    if (newToken) {
+      localStorage.setItem('token', newToken);
+    }
+    if (userData) {
+      localStorage.setItem('user', JSON.stringify(userData));
+    }
 
     setUser(userData);
 
