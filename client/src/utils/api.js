@@ -1,6 +1,20 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || window.location.origin;
+const getApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    // When accessed through production domain or non-localhost, route to production API
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      if (!envUrl || envUrl.includes('localhost') || envUrl.includes('127.0.0.1')) {
+        return 'https://api.praktis-project.site';
+      }
+    }
+  }
+  return envUrl || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5001');
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,

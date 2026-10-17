@@ -95,11 +95,16 @@ export const sendPasswordResetEmail = async (toEmail, userName, resetToken) => {
     logger.info(`📧 Password reset email dispatched to ${toEmail}. Message ID: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    logger.error('❌ Failed to send password reset email:', { error: error.message, to: toEmail });
-    // Still log reset link in development so devs can debug
-    if (env.nodeEnv === 'development') {
-      logger.info(`📧 [FALLBACK DEV LINK] ${resetUrl}`);
-    }
+    const isBadCredentials = error.message?.includes('535') || error.message?.includes('BadCredentials');
+    logger.error('❌ Failed to send password reset email:', {
+      error: error.message,
+      to: toEmail,
+      hint: isBadCredentials
+        ? 'Gmail SMTP memerlukan Google App Password (Sandi Aplikasi 16 karakter), bukan password akun Google biasa. Buat di https://myaccount.google.com/apppasswords'
+        : undefined,
+    });
+    // Always print reset link to container logs as emergency backup
+    logger.warn(`🔗 [RESET LINK BACKUP] Gunakan link berikut untuk reset password (${toEmail}):\n${resetUrl}`);
     throw error;
   }
 };
