@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import SidebarAdmin from '../components/SidebarAdmin';
 import Header from '../components/header';
-import Footer from '../components/Footer';
+import Footer from '../components/footer';
 
 const LayoutAdmin = () => {
     // State untuk mengatur buka/tutup sidebar di Mobile

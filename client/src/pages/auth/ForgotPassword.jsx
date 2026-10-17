@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import api from '../../utils/api';
 import logoPA from '../../assets/img/logo_pa.jpeg';
 import ContactSupportModal from '../../components/ContactSupportModal';
-import '../../assets/css/Login.css';
+import '../../assets/css/login.css';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');

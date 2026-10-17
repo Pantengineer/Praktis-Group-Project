@@ -4,7 +4,7 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import api from '../../utils/api';
 import logoPA from '../../assets/img/logo_pa.jpeg';
-import '../../assets/css/Login.css';
+import '../../assets/css/login.css';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
