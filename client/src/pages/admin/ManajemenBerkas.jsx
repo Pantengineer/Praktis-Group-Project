@@ -22,10 +22,12 @@ const ManajemenBerkas = () => {
         api.get('/api/admin/files'),
         api.get('/api/admin/storage-stats')
       ]);
-      setFiles(resFiles.data.files || []);
-      setStorageStats(resStorage.data);
+      const fileData = resFiles.data?.files || (Array.isArray(resFiles.data) ? resFiles.data : []);
+      setFiles(Array.isArray(fileData) ? fileData : []);
+      setStorageStats(resStorage?.data || null);
     } catch (err) {
       console.error("Error fetching files:", err);
+      setFiles([]);
     } finally {
       setLoading(false);
     }
@@ -107,10 +109,10 @@ const ManajemenBerkas = () => {
 
     return true;
   }).sort((a, b) => {
-    if (sortBy === 'SIZE_DESC') return b.size - a.size;
-    if (sortBy === 'SIZE_ASC') return a.size - b.size;
-    if (sortBy === 'NAME_ASC') return a.filename.localeCompare(a.filename);
-    return new Date(b.createdAt) - new Date(a.createdAt); // DATE_DESC
+    if (sortBy === 'SIZE_DESC') return (b?.size || 0) - (a?.size || 0);
+    if (sortBy === 'SIZE_ASC') return (a?.size || 0) - (b?.size || 0);
+    if (sortBy === 'NAME_ASC') return String(a?.filename || '').localeCompare(String(b?.filename || ''));
+    return new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0); // DATE_DESC
   });
 
   return (

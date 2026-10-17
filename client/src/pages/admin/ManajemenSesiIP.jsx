@@ -47,10 +47,18 @@ const ManajemenSesiIP = () => {
         api.get('/api/admin/active-sessions'),
         api.get('/api/admin/banned-ips')
       ]);
-      setActiveSessions(resSessions.data.activeSessions || []);
-      setBannedIps(resBanned.data.bannedIps || []);
+      const sessions = Array.isArray(resSessions.data?.activeSessions) 
+        ? resSessions.data.activeSessions 
+        : (Array.isArray(resSessions.data) ? resSessions.data : []);
+      const bans = Array.isArray(resBanned.data?.bannedIps) 
+        ? resBanned.data.bannedIps 
+        : (Array.isArray(resBanned.data) ? resBanned.data : []);
+      setActiveSessions(sessions);
+      setBannedIps(bans);
     } catch (err) {
       console.error("Error fetching session/IP data:", err);
+      setActiveSessions([]);
+      setBannedIps([]);
     } finally {
       setLoading(false);
     }

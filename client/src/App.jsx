@@ -44,10 +44,12 @@ import SessionDetailMhs from './pages/mahasiswa/SessionDetail';
 
 import Profile from './pages/common/Profile';
 import Timeline from './pages/common/Timeline';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
-    <Routes>
+    <ErrorBoundary>
+      <Routes>
 
       {/* --- Public Routes --- */}
       <Route path="/" element={<Login />} />
@@ -134,6 +136,7 @@ function App() {
       </Route>
 
     </Routes>
+    </ErrorBoundary>
   );
 }
 

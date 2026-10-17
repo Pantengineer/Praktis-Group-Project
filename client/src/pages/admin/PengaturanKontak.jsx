@@ -26,7 +26,7 @@ const PengaturanKontak = () => {
           phone: d.phone || '',
           email: d.email || '',
           hours: d.hours || '',
-          whatsappMessage: 'Halo Admin PRAKTIS, saya ingin bertanya terkait praktikum.',
+          whatsappMessage: d.whatsappMessage || 'Halo Admin PRAKTIS, saya ingin bertanya terkait praktikum.',
         });
         setPreviewData(d);
       }

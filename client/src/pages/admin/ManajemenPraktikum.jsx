@@ -21,11 +21,15 @@ const ManajemenPraktikum = () => {
     const [filterRuangan, setFilterRuangan] = useState('');
     const [filterAsdos, setFilterAsdos] = useState('');
 
-    const filteredLabs = labs.filter(lab => {
-        const asdosNames = (lab.PraktikumUserRoles || []).map(r => r.User?.nama?.toLowerCase() || '').join(' ');
-        const searchLower = searchTerm.toLowerCase();
+    const safeLabs = Array.isArray(labs) ? labs : [];
 
-        const matchesSearch = lab.mata_kuliah.toLowerCase().includes(searchLower) ||
+    const filteredLabs = safeLabs.filter(lab => {
+        if (!lab) return false;
+        const asdosNames = (lab.PraktikumUserRoles || []).map(r => r.User?.nama?.toLowerCase() || '').join(' ');
+        const searchLower = (searchTerm || '').toLowerCase();
+
+        const matchesSearch = !searchLower ||
+            (lab.mata_kuliah && lab.mata_kuliah.toLowerCase().includes(searchLower)) ||
             (lab.kode_kelas && lab.kode_kelas.toLowerCase().includes(searchLower)) ||
             asdosNames.includes(searchLower);
 
@@ -74,11 +78,15 @@ const ManajemenPraktikum = () => {
 
     const fetchLabs = async () => {
         try {
+            setLoading(true);
             const res = await api.get('/api/admin/praktikum');
-            // Handle both paginated response { data: [...] } and plain array
-            setLabs(Array.isArray(res.data) ? res.data : (res.data.data || []));
+            const data = Array.isArray(res.data) 
+                ? res.data 
+                : (Array.isArray(res.data?.data) ? res.data.data : (Array.isArray(res.data?.praktikum) ? res.data.praktikum : []));
+            setLabs(data);
         } catch (err) {
-            console.error(err);
+            console.error('Error fetching labs:', err);
+            setLabs([]);
         } finally {
             setLoading(false);
         }

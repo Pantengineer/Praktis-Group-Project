@@ -22,6 +22,9 @@ import apiRoutes from './routes/index.js';
 // Initialize App
 const app = express();
 
+// Trust reverse proxy (Docker, Nginx, Cloudflare) for accurate client IPs and rate limiting
+app.set('trust proxy', 1);
+
 // Global Middleware
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(corsMiddleware);
