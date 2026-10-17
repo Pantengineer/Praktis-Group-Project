@@ -5,6 +5,8 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    networks:
+      - private-net
     restart: unless-stopped
 
   mysql:
@@ -15,6 +17,8 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - private-net
     restart: unless-stopped
 
   server:
@@ -39,6 +43,8 @@ services:
     depends_on:
       - mysql
       - mongodb
+    networks:
+      - private-net
     restart: unless-stopped
 
   client:
@@ -57,8 +63,14 @@ services:
       - VITE_API_URL=https://api.praktis-project.site
     depends_on:
       - server
+    networks:
+      - private-net
     restart: unless-stopped
 
 volumes:
   mongodb_data:
   mysql_data:
+
+networks:
+  private-net:
+    external: true
