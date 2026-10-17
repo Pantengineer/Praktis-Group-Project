@@ -6,6 +6,13 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     server: {
+      host: true,
+      allowedHosts: [
+        'praktis-project.site',
+        '.praktis-project.site',
+        'localhost',
+        '127.0.0.1',
+      ],
       proxy: {
         '/api': {
           target: env.VITE_API_URL || 'http://localhost:5001',
