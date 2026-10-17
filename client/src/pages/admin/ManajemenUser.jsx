@@ -17,15 +17,23 @@ const ManajemenUser = () => {
     const [filterAngkatan, setFilterAngkatan] = useState('');
     const [filterRole, setFilterRole] = useState('');
 
-    const filteredUsers = users.filter(u => {
-        const matchesSearch = (u.nama && u.nama.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                              (u.nim && u.nim.toLowerCase().includes(searchTerm.toLowerCase()));
+    // Safe Users Array
+    const safeUsers = Array.isArray(users) ? users : [];
+
+    const filteredUsers = safeUsers.filter(u => {
+        if (!u) return false;
+        const searchLower = (searchTerm || '').toLowerCase();
+        const matchesSearch = !searchLower ||
+                              (u.nama && u.nama.toLowerCase().includes(searchLower)) ||
+                              (u.nim && u.nim.toLowerCase().includes(searchLower)) ||
+                              (u.email && u.email.toLowerCase().includes(searchLower));
         
         const matchesProdi = filterProdi === '' || u.prodi === filterProdi;
         const matchesAngkatan = filterAngkatan === '' || String(u.angkatan) === filterAngkatan;
         
-        const isAdmin = u.Roles?.some(r => r.deskripsi === 'admin');
-        const isAsdos = u.Roles?.some(r => r.deskripsi === 'asdos');
+        const userRoles = Array.isArray(u.Roles) ? u.Roles : [];
+        const isAdmin = userRoles.some(r => r?.deskripsi === 'admin');
+        const isAsdos = userRoles.some(r => r?.deskripsi === 'asdos');
         const highestRole = isAdmin ? 'admin' : (isAsdos ? 'asdos' : 'mahasiswa');
         const matchesRole = filterRole === '' || highestRole === filterRole;
 
@@ -50,10 +58,15 @@ const ManajemenUser = () => {
 
     const fetchUsers = async () => {
         try {
+            setLoading(true);
             const res = await api.get('/api/admin/users');
-            setUsers(Array.isArray(res.data) ? res.data : (res.data.data || []));
+            const data = Array.isArray(res.data) 
+                ? res.data 
+                : (Array.isArray(res.data?.data) ? res.data.data : (Array.isArray(res.data?.users) ? res.data.users : []));
+            setUsers(data);
         } catch (err) {
-            console.error(err);
+            console.error('Error fetching users:', err);
+            setUsers([]);
         } finally {
             setLoading(false);
         }
@@ -158,14 +171,14 @@ const ManajemenUser = () => {
                                         <div className="mb-1">Prodi</div>
                                         <select className="form-select form-select-sm" value={filterProdi} onChange={e => {setFilterProdi(e.target.value); setCurrentPage(1);}}>
                                             <option value="">Semua</option>
-                                            {[...new Set(users.map(u => u.prodi).filter(Boolean))].map(p => <option key={p} value={p}>{p}</option>)}
+                                            {[...new Set(safeUsers.map(u => u?.prodi).filter(Boolean))].map(p => <option key={p} value={p}>{p}</option>)}
                                         </select>
                                     </th>
                                     <th>
                                         <div className="mb-1">Angkatan</div>
                                         <select className="form-select form-select-sm" value={filterAngkatan} onChange={e => {setFilterAngkatan(e.target.value); setCurrentPage(1);}}>
                                             <option value="">Semua</option>
-                                            {[...new Set(users.map(u => u.angkatan).filter(Boolean))].sort().reverse().map(a => <option key={a} value={a}>{a}</option>)}
+                                            {[...new Set(safeUsers.map(u => u?.angkatan).filter(Boolean))].sort().reverse().map(a => <option key={a} value={a}>{a}</option>)}
                                         </select>
                                     </th>
                                     <th className="align-middle">Email</th>
@@ -190,15 +203,17 @@ const ManajemenUser = () => {
                                     }
 
                                     return currentUsers.map(u => {
+                                        if (!u) return null;
                                         // Determine highest privilege role
-                                        const isAdmin = u.Roles?.some(r => r.deskripsi === 'admin');
-                                        const isAsdos = u.Roles?.some(r => r.deskripsi === 'asdos');
+                                        const userRoles = Array.isArray(u.Roles) ? u.Roles : [];
+                                        const isAdmin = userRoles.some(r => r?.deskripsi === 'admin');
+                                        const isAsdos = userRoles.some(r => r?.deskripsi === 'asdos');
 
                                         const topRole = isAdmin ? 'admin' : (isAsdos ? 'asdos' : 'mahasiswa');
                                         const badgeClass = isAdmin ? 'bg-danger' : (isAsdos ? 'bg-primary' : 'bg-secondary');
 
                                         return (
-                                            <tr key={u.id_user}>
+                                            <tr key={u.id_user || Math.random()}>
                                                 <td className="fw-bold">{u.nama}</td>
                                                 <td>{u.nim || '-'}</td>
                                                 <td>{u.prodi || '-'}</td>

@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom';
 import SidebarAdmin from '../components/SidebarAdmin';
 import Header from '../components/header';
 import Footer from '../components/footer';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 const LayoutAdmin = () => {
     // State untuk mengatur buka/tutup sidebar di Mobile
@@ -44,7 +45,9 @@ const LayoutAdmin = () => {
 
                     {/* OUTLET (Isi Dashboard) */}
                     <div className="container-fluid px-4 py-4 flex-grow-1">
-                        <Outlet />
+                        <ErrorBoundary>
+                            <Outlet />
+                        </ErrorBoundary>
                     </div>
 
                     {/* FOOTER */}

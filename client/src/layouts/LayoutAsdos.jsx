@@ -3,6 +3,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '../components/header';
 import Footer from '../components/footer';
+import ErrorBoundary from '../components/ErrorBoundary';
 import '../assets/css/asdos-theme.css'; // ADDED FOR THEME
 
 const LayoutAsdos = () => {
@@ -20,7 +21,9 @@ const LayoutAsdos = () => {
                 >
                     {/* Outlet */}
                     <div className="container-fluid px-4 py-4 flex-grow-1">
-                        <Outlet />
+                        <ErrorBoundary>
+                            <Outlet />
+                        </ErrorBoundary>
                     </div>
 
                     <Footer />
