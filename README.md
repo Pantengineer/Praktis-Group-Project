@@ -28,14 +28,29 @@
   - Inline file deletion across Asdos & Admin views (Materi, Tugas, SessionDetail, and Penilaian grading table).
 - **Human-Readable File Name Obfuscation**: Strips internal storage timestamp prefixes (`userId-timestamp-`) from browser download headers (`Content-Disposition`) and UI cards while maintaining collision-free disk storage.
 - **APM Observability & Security Monitoring**: Live refresh status badges, IP ban enforcement, active session tracking, and storage quota statistics.
+- **Password Reset via Email (Self-Service Recovery)**:
+  - Secure cryptographic token generation (32-byte / 64-hex) with 15-minute TTL.
+  - SHA-256 token hashing at rest in MariaDB (`password_resets`) to prevent database leak vulnerabilities.
+  - Anti-user enumeration protection on reset requests.
+  - Automated HTML email dispatch via **Nodemailer** with seamless console fallback for local development.
+  - Dedicated rate limiting on request and reset execution endpoints.
+- **Interactive Client-Side FAQ Center**:
+  - Zero-overhead static FAQ (`/faq`) loaded directly on the client with instant response time.
+  - Real-time search query filtering and categorized filter pills (Akun, Praktikum, Tugas, Presensi).
+  - Smooth Framer Motion accordion animations and direct access to helpdesk contact channels.
+- **Dynamic Helpdesk & WhatsApp Contact System**:
+  - Key-value configuration store in MariaDB (`system_settings`) for lab contact number, official email, and helpdesk hours.
+  - Admin management interface (`/admin/contact-settings`) with live preview card.
+  - Auto-conversion of Indonesian phone numbers (`08...`) to international WhatsApp direct links (`https://wa.me/628...`).
+  - Reusable `ContactSupportModal` accessible across Login, FAQ, and platform layouts.
 
 ---
 
 ## Architecture & Tech Stack 🛠️
 
-- **Frontend**: React 18, Vite, React Router v6, Axios, Bootstrap 5, Framer Motion, Recharts, React Calendar.
-- **Backend**: Node.js, Express, Sequelize (MySQL/MariaDB), Mongoose (MongoDB), Multer, Express Rate Limit, JWT, Cookie-Parser, Helmet, Winston.
-- **File Storage**: Local disk storage (`server/uploads/materi/`, `server/uploads/submissions/`, `server/uploads/tasks/`).
+- **Frontend**: React 19, Vite 7, React Router v7, Axios, Bootstrap 5, Bootstrap Icons, Framer Motion, Recharts, React Calendar.
+- **Backend**: Node.js, Express, Sequelize (MySQL/MariaDB), Mongoose (MongoDB), Nodemailer (SMTP), Multer, Express Rate Limit, JWT, Cookie-Parser, Helmet, Winston.
+- **File Storage**: Local disk storage (`server/uploads/materials/`, `server/uploads/submissions/`, `server/uploads/tasks/`).
 
 ---
 
@@ -45,24 +60,28 @@
 Praktis-Group-Project/
 ├── client/                      # React SPA Frontend
 │   ├── src/
-│   │   ├── components/          # Reusable UI components (ClassHeaderBanner, etc.)
+│   │   ├── components/          # Reusable UI (ContactSupportModal, SidebarAdmin, Header, Footer)
 │   │   ├── context/             # AuthContext & state providers
-│   │   ├── pages/               # Role-based views
-│   │   │   ├── admin/           # Dashboard, ManajemenPraktikum, ManajemenBerkas, ManajemenSesiIP
+│   │   ├── data/                # Static data (faqData.js)
+│   │   ├── pages/               # Role-based & public views
+│   │   │   ├── admin/           # Dashboard, ManajemenPraktikum, ManajemenBerkas, ManajemenSesiIP, PengaturanKontak
 │   │   │   ├── asdos/           # Dashboard, Materi, Tugas, SessionDetail, Penilaian
 │   │   │   ├── mahasiswa/       # Dashboard, Jadwal, Materi, TugasUpload, SessionDetail
-│   │   │   └── common/          # Timeline, Login, Profile
+│   │   │   ├── auth/            # Login, RoleSelection, ForgotPassword, ResetPassword
+│   │   │   ├── public/          # Faq
+│   │   │   └── common/          # Timeline, Profile
 │   │   ├── utils/               # Axios API instance, role helpers, fileHelpers.js
 │   │   └── App.jsx              # Main routes & protected layout routing
 │   └── vite.config.js
 │
 ├── server/                      # Express REST API Backend
-│   ├── config/                  # DB connection configs (SQL & Mongo) & env loaders
-│   ├── controllers/             # Request handlers (auth, content, submission, admin)
+│   ├── config/                  # DB connection configs (SQL & Mongo), env loaders, cors
+│   ├── controllers/             # Request handlers (auth, content, submission, admin, systemSetting)
 │   ├── middleware/              # authMiddleware, rbacMiddleware, uploadMiddleware, rateLimiter, errorHandler
-│   ├── models/                  # SQL (Sequelize) & NoSQL (Mongoose) schemas
-│   ├── routes/                  # Express endpoints (auth, admin, content, submission, user, attendance)
-│   ├── uploads/                 # Storage folders (materi, submissions, tasks)
+│   ├── models/                  # SQL (User, Role, PasswordReset, SystemSetting, etc.) & NoSQL schemas
+│   ├── routes/                  # Express endpoints (auth, admin, content, submission, user, attendance, settings)
+│   ├── services/                # Business logic (authService, emailService, systemSettingService, etc.)
+│   ├── uploads/                 # Storage folders (materials, submissions, tasks)
 │   ├── seed.js                  # Database seeder script
 │   └── server.js                # App entry point & HTTP listener
 │
@@ -138,6 +157,17 @@ ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
 # File Upload Anti-Abuse Limits (in MB)
 MAX_STORAGE_LIMIT_MB=5000
 MAX_USER_QUOTA_MB=100
+
+# Frontend URL
+FRONTEND_URL=http://localhost:5173
+
+# Email / SMTP Configuration (Optional in local dev; falls back to logger console)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+EMAIL_FROM="Praktis Support <no-reply@praktis.ac.id>"
 ```
 
 **Populate Initial Data (Seeding):**
@@ -194,6 +224,11 @@ npm run dev
 
 ## Release History 📌
 
+- **1.3.0**
+  - Implemented self-service Password Reset via Email with Nodemailer and SHA-256 hashed token persistence (`password_resets`).
+  - Added interactive static FAQ Center (`/faq`) with live keyword search and multi-category filters.
+  - Added dynamic Helpdesk & WhatsApp Contact Management in MariaDB (`system_settings`) with Admin configuration panel (`/admin/contact-settings`).
+  - Added safe automated database sync (`sequelize.sync()`) on server startup.
 - **1.2.0**
   - Added 5-layer upload anti-abuse system (100 MB per-user cap, rate limiter, MIME double-validation, ENOSPC interceptor).
   - Added universal file unloading (student unsubmit, automatic re-upload cleanup, Asdos & Admin inline file deletion).
