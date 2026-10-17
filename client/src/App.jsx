@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages - Auth
-import Login from './pages/auth/Login';
+import Login from './pages/auth/login';
 import RoleSelection from './pages/auth/RoleSelection';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';

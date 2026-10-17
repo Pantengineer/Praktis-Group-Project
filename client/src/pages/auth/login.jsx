@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../../utils/api';
 import { useAuth } from '../../context/authContext';
 import { motion } from 'framer-motion';
-import '../../assets/css/Login.css';
+import '../../assets/css/login.css';
 import logoPA from '../../assets/img/logo_pa.jpeg';
 import ContactSupportModal from '../../components/ContactSupportModal';
 
