@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 // Colors for the Pie Chart
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#ff7300', '#413ea0', '#f50057'];
@@ -237,35 +238,37 @@ const Dashboard = () => {
                 <h6 className="fw-bold mb-0"><i className="bi bi-pie-chart-fill text-primary me-2"></i>Distribusi Program Studi</h6>
               </div>
               <div className="card-body" style={{ height: '350px' }}>
-                {stats.prodiDistribution && stats.prodiDistribution.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={stats.prodiDistribution}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={80}
-                        outerRadius={120}
-                        fill="#8884d8"
-                        paddingAngle={5}
-                        dataKey="value"
-                      >
-                        {stats.prodiDistribution.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        formatter={(value, name) => [`${value} Mahasiswa`, name]}
-                        contentStyle={{ borderRadius: '10px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-                      />
-                      <Legend verticalAlign="bottom" height={36} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="d-flex h-100 justify-content-center align-items-center text-muted">
-                    Tidak ada data prodi.
-                  </div>
-                )}
+                <ErrorBoundary fallback={<div className="d-flex h-100 justify-content-center align-items-center text-muted"><i className="bi bi-pie-chart me-2"></i>Grafik sedang tidak dapat dimuat.</div>}>
+                  {stats.prodiDistribution && stats.prodiDistribution.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={stats.prodiDistribution}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={80}
+                          outerRadius={120}
+                          fill="#8884d8"
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {stats.prodiDistribution.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value, name) => [`${value} Mahasiswa`, name]}
+                          contentStyle={{ borderRadius: '10px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+                        />
+                        <Legend verticalAlign="bottom" height={36} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="d-flex h-100 justify-content-center align-items-center text-muted">
+                      Tidak ada data prodi.
+                    </div>
+                  )}
+                </ErrorBoundary>
               </div>
             </div>
           </motion.div>
@@ -278,11 +281,13 @@ const Dashboard = () => {
                 <span className="badge bg-info text-dark rounded-pill">Sesi Aktif Disorot</span>
               </div>
               <div className="card-body d-flex flex-column align-items-center">
-                <Calendar 
-                  tileClassName={tileClassName}
-                  onClickDay={handleDayClick}
-                  className="rounded-3 shadow-sm border-0 mb-3"
-                />
+                <ErrorBoundary fallback={<div className="p-3 text-center text-muted"><i className="bi bi-calendar-x me-2"></i>Kalender sedang tidak dapat dimuat.</div>}>
+                  <Calendar 
+                    tileClassName={tileClassName}
+                    onClickDay={handleDayClick}
+                    className="rounded-3 shadow-sm border-0 mb-3"
+                  />
+                </ErrorBoundary>
                 
                 {selectedDateInfo && (
                   <div className="w-100 p-3 bg-light rounded-3 border shadow-sm">

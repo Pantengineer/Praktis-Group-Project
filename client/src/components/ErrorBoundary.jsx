@@ -17,6 +17,9 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
       return (
         <div className="container py-4 my-3">
           <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
