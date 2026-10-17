@@ -41,7 +41,7 @@ const ManajemenUser = () => {
     const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
     const currentUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-    const { formData, handleChange, reset } = useForm({
+    const [formData, setFormData] = useState({
         nama: '',
         email: '',
         password: '',
@@ -50,6 +50,23 @@ const ManajemenUser = () => {
         prodi: '',
         angkatan: new Date().getFullYear()
     });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const reset = () => {
+        setFormData({
+            nama: '',
+            email: '',
+            password: '',
+            role: 'mahasiswa',
+            nim: '',
+            prodi: '',
+            angkatan: new Date().getFullYear()
+        });
+    };
 
     useEffect(() => {
         fetchUsers();
